@@ -4,6 +4,7 @@ import { config } from './config.js';
 import { WebSocketHub } from './services/ws-hub.js';
 import { SimulatorAdapter } from './adapters/ring-simulator-adapter.js';
 import { createRingWebhookRouter } from './routes/ring-webhook.js';
+import { handleRingEvent } from './controllers/event-controller.js';
 import { AlertPayload } from '../shared/types.js';
 
 const app = express();
@@ -49,6 +50,11 @@ app.use(
       if (simulatorAdapter) {
         await simulatorAdapter.emitVisitorEvent(payload);
       }
+
+      // 3. Async Phase 2: Bedrock AI enrichment (5 s timeout, failure-safe)
+      handleRingEvent(payload, wsHub).catch((err) =>
+        console.error('[EventController] unhandled error in Phase 2:', err)
+      );
     },
   })
 );

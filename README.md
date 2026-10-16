@@ -64,9 +64,14 @@ SignalDoor implements a unified `RingAdapter` interface supporting two modes:
 
 ## Testing & Quality Assurance
 
-- **Run all tests:**
+- **Run all automated unit & integration tests (mocked Bedrock):**
   ```bash
   npm test
+  ```
+- **Run optional live Amazon Bedrock smoke test:**
+  *(Requires valid AWS credentials in your environment)*
+  ```bash
+  RUN_LIVE_BEDROCK=1 npm test -- tests/bedrock-service.test.ts
   ```
 - **Run lint checks:**
   ```bash
@@ -78,6 +83,17 @@ SignalDoor implements a unified `RingAdapter` interface supporting two modes:
   ```
 
 ---
+
+## Amazon Bedrock Multimodal AI Enrichment
+
+SignalDoor uses the Amazon Bedrock Converse API (`@aws-sdk/client-bedrock-runtime`) to generate concise, plain-language descriptions ($\le 25$ words) of incoming doorbell visitors:
+- **Two-Phase Delivery:** When a doorbell event occurs, Phase 1 (`"Someone is at your door"`) flashes immediately ($\le 2.0$s) so deaf residents never miss a visitor. Phase 2 enriches the alert with AI description if Bedrock responds within 5.0 seconds. If Bedrock times out or errors, the UI remains cleanly on the Phase 1 notification.
+- **Privacy First (In-Memory Processing):** Image bytes are kept exclusively in memory buffers during inference; they are never written to disk or logged.
+- **Tunable Prompt:** System instructions and accessibility guardrails live in `src/server/services/bedrock-prompt.txt`.
+- **Environment Variables:**
+  - `AWS_REGION`: Bedrock region (e.g. `us-east-1`)
+  - `BEDROCK_MODEL_ID`: Configured multimodal model ID (e.g. `anthropic.claude-3-haiku-20240307-v1:0`)
+  - `BEDROCK_TIMEOUT_MS`: Hard SLA timeout in ms (default: `5000`)
 
 ## Security & Privacy Notice
 

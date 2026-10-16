@@ -11,6 +11,7 @@ export interface AppConfig {
   internalDevSecret: string;
   awsRegion: string;
   bedrockModelId: string;
+  bedrockTimeoutMs: number;
   databasePath: string;
 }
 
@@ -22,5 +23,6 @@ export const config: AppConfig = {
   internalDevSecret: process.env.INTERNAL_DEV_SECRET || 'dev-local-secret-change-me',
   awsRegion: process.env.AWS_REGION || 'us-east-1',
   bedrockModelId: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-haiku-20240307-v1:0',
+  bedrockTimeoutMs: parseInt(process.env.BEDROCK_TIMEOUT_MS || '5000', 10),
   databasePath: process.env.DATABASE_PATH || './signaldoor.db',
 };

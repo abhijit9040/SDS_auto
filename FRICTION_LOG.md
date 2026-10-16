@@ -21,7 +21,19 @@
 ---
 
 ## 2. Amazon Bedrock Converse API Experience
-*(Entries to be added during Task 2 implementation)*
+
+### Task 2: Multimodal Visitor Summaries & 5-Second SLA Fallback
+- **AbortController Integration with AWS SDK v3:**
+  - *Friction:* Bedrock inference latency can fluctuate based on region load and image payload size. To guarantee accessibility responsiveness for deaf users, the UI cannot wait indefinitely for AI enrichment.
+  - *Solution:* Wired an `AbortController` with a 5.0s timer (`config.bedrockTimeoutMs`) into `@aws-sdk/client-bedrock-runtime`'s `send(command, { abortSignal })`. When aborted, the error is caught cleanly and latency is logged, leaving the resident on the Phase 1 fallback alert text (`"Someone is at your door"`).
+- **In-Memory Zero-Disk Retention for Visitor Privacy:**
+  - *Requirement:* Security and privacy demand that visitor camera frames are never written to temporary files or logged in plaintext.
+  - *Solution:* Image bytes are ingested directly as Node.js `Buffer` in memory and passed into `ConverseCommandInput.messages[0].content[0].image.source.bytes`. Logging outputs device ID, event type, and latency in milliseconds, strictly omitting byte buffers and base64 strings.
+- **Converse API Output ContentBlock Schema:**
+  - *Friction:* AWS Bedrock's TypeScript types for `ContentBlock` represent a discriminated union without a uniform `.type` discriminator property (e.g. `{ text?: string } | { image?: ... }`). Checking `c.type === 'text'` resulted in TS2339.
+  - *Solution:* Refactored extraction to use `'text' in c && typeof c.text === 'string'`, ensuring robust type-safe parsing across all Bedrock runtime versions.
+- **Prompt Isolation for Accessibility Tuning:**
+  - *Learning:* Housing the system prompt in a standalone text file (`bedrock-prompt.txt`) enabled rapid iteration of safety boundaries (e.g., hard 25-word limit, zero identity/ethnicity guessing, graceful "unclear" fallbacks) without touching core service code.
 
 ---
 

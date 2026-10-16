@@ -1,0 +1,77 @@
+:root {
+  /* High contrast color palette (WCAG AAA / AA compliant) */
+  --bg-primary: #0a0e17;
+  --bg-surface: #141c2e;
+  --bg-elevated: #1e293b;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  /* Brand & status accents (Tailored HSL) */
+  --accent-cyan: #06b6d4;
+  --accent-cyan-hover: #0891b2;
+  --alert-urgent: #ef4444;
+  --alert-urgent-bg: #450a0a;
+  --alert-warning: #f59e0b;
+  --alert-success: #10b981;
+
+  /* Typography */
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    sans-serif;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem; /* 24px - minimum alert text size */
+  --text-2xl: 2rem; /* 32px */
+  --text-3xl: 2.5rem; /* 40px */
+
+  /* Focus & contrast borders */
+  --focus-ring: 3px solid #38bdf8;
+  --border-subtle: 1px solid #334155;
+  --border-contrast: 2px solid #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Safe flash animation (maximum 2 flashes per second, well under WCAG 2.3.1 3/s threshold) */
+@keyframes safeStrobe {
+  0%,
+  100% {
+    background-color: var(--alert-urgent-bg);
+    border-color: var(--alert-urgent);
+  }
+  50% {
+    background-color: var(--bg-surface);
+    border-color: var(--border-contrast);
+  }
+}
+
+.strobe-alert {
+  animation: safeStrobe 0.8s ease-in-out infinite;
+}

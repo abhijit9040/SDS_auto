@@ -1,16 +1,21 @@
 import React from 'react';
-import { AlertPayload } from '../../shared/types.js';
+import { AlertPayload, QuickReplyText } from '../../shared/types.js';
+import { QuickReplies } from './QuickReplies.js';
 
 interface ResidentAlertProps {
   alert: AlertPayload;
   onDismiss: () => void;
   flashEnabled?: boolean;
+  onSendReply?: (reply: QuickReplyText) => void;
+  deliveredReply?: string | null;
 }
 
 export const ResidentAlert: React.FC<ResidentAlertProps> = ({
   alert,
   onDismiss,
   flashEnabled = true,
+  onSendReply,
+  deliveredReply = null,
 }) => {
   return (
     <section
@@ -59,7 +64,9 @@ export const ResidentAlert: React.FC<ResidentAlertProps> = ({
         {alert.title}
       </h2>
 
+      {/* Alert text updates announced politely to assistive technologies */}
       <p
+        aria-live="polite"
         style={{
           fontSize: 'var(--text-xl)', // 24px minimum font size
           fontWeight: 600,
@@ -73,6 +80,15 @@ export const ResidentAlert: React.FC<ResidentAlertProps> = ({
       >
         {alert.body}
       </p>
+
+      {/* Two-Way Quick Replies */}
+      {onSendReply && (
+        <QuickReplies
+          eventId={alert.eventId}
+          onSendReply={onSendReply}
+          deliveredReply={deliveredReply}
+        />
+      )}
 
       <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
         <button

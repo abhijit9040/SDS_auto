@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current stage: 6 (Stage 6 — Feature Implementation: current task = Task 3)
+Current stage: 6 (Stage 6 — Feature Implementation: current task = Task 4: Accessibility Hardening)
 Completed:
 - Stage 0: Idea Brief (`BRIEF.md` created, gate verified)
 - Stage 1: Requirements and Scope (`SPEC.md` created & amended, gate verified)
@@ -9,6 +9,7 @@ Completed:
 - Stage 4: Plan and Task Breakdown (`PLAN.md` created & amended with HMAC in Task 1, Snapshots API in Task 5, gate verified)
 - Stage 5: Walking Skeleton (Task 1: HMAC Webhook to Phase 1 Alert End-to-End completed and verified)
 - Stage 6 (Task 2): Bedrock AI Multimodal Phase 2 Enrichment completed with 5s timeout fallback, AbortController, prompt isolation, zero-disk in-memory processing, clean fallback rejection for >25 words, and prompt tightened to 20 words
+- Stage 6 (Task 3): Two-Way Quick Replies & Visitor Screen (`/visitor`) completed with strict server whitelist, SQLite audit logging (`node:sqlite`), `REPLY_ACK`, `>=48px` touch targets, stale reply reset, and `DEMO_NOTES.md` recording script
 
 Decisions:
 - Project Name: SignalDoor (Deaf-friendly Doorbell)
@@ -30,7 +31,13 @@ Decisions:
   * Word Limit Fallback: If summary exceeds 25 words, discard partial text and fall back to clean Phase 1 alert text rather than cut-off sentences with ellipsis
   * Failure & Timeout Resilience: UI stays on Phase 1 text without flashing errors or disappearing alerts
   * Live Smoke Test: `RUN_LIVE_BEDROCK=1 npm test -- tests/bedrock-service.test.ts` (skipped in standard CI)
-- Demo Milestones: Rough demo video checkpoint at Task 3; Task 6 starts no later than Day 5; README, feedback, and friction log updated in every task
+- Two-Way Quick Replies & Visitor Display:
+  * Server-Side Whitelist Validation: Only `'Leave it at the door'`, `'Coming in 2 minutes'`, and `"I can't hear, please text me"` are accepted; untrusted client input is rejected with `ERROR: REJECTED`
+  * SQLite Transaction Audit Logging: Integrated Node.js built-in `node:sqlite` (`DatabaseSync`), logging every reply with `event_id`, `reply_text`, and ISO `timestamp`
+  * Delivery Confirmation: Dispatches `{ type: 'REPLY_ACK', payload: { eventId, status: 'DELIVERED' } }` back to the resident
+  * Exterior Screen (`/visitor`): Dedicated high-contrast visitor view with timestamp; automatically resets to *"Waiting for response..."* on new `ALERT_PHASE_1` doorbell events
+  * Accessible Touch Targets: Buttons sized $\ge 48$px with visible focus indicators and `aria-live="polite"` on alert text
+- Demo Milestones: Rough demo video checkpoint script produced in `DEMO_NOTES.md` (<3 minutes side-by-side); README, feedback, and friction log updated in every task
 
 Open questions & Contingencies:
 - Day 2 Fallback Trigger: Fallback to Alexa+ MCP server (Streamable HTTP) if no simulated/live Ring webhook events work by end of Day 2

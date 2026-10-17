@@ -48,7 +48,17 @@
 ---
 
 ## 3. Real-Time & Accessibility Implementation
-*(Entries to be added during Tasks 3 & 4 implementation)*
+
+### Task 3: Two-Way Quick Replies & Visitor Screen Synchronization
+- **SQLite Ingestion with Node.js `node:sqlite`:**
+  - *Friction:* Traditional native SQLite bindings (such as `better-sqlite3` or `sqlite3`) frequently fail on Windows development machines due to missing Visual Studio C++ toolchains or Python node-gyp compilation errors.
+  - *Solution:* Utilized Node.js 22+'s built-in `node:sqlite` (`DatabaseSync`). It provides synchronous prepared statements, zero external native compilation requirements, and fast in-memory execution for unit tests (`:memory:`).
+- **Server-Side Whitelist Validation of Untrusted Clients:**
+  - *Security Practice:* WebSocket client payloads cannot be trusted. If an adversary sends arbitrary strings or scripts via `QUICK_REPLY`, the backend strictly validates against `ALLOWED_QUICK_REPLIES` (`'Leave it at the door'`, `'Coming in 2 minutes'`, `"I can't hear, please text me"`). Any disallowed input is rejected immediately without DB insertion or visitor broadcast.
+- **Dual-Tab State Reset for Stale Visitor Messages:**
+  - *Ergonomics:* When a resident responds to a delivery courier, the reply remains on `/visitor` until the next doorbell ring. To prevent stale replies (e.g. telling a neighbor *"Leave it at the door"* because of a delivery 10 minutes prior), `broadcastPhase1Alert` pushes `ALERT_PHASE_1` to visitor clients as well, resetting the screen to *"Waiting for response..."* instantly.
+- **WebSocket Handshake Determinism in Automated Tests:**
+  - *Testing Learning:* In high-speed tests, calling `broadcast` immediately after `ws.on('open')` causes race conditions because the subscription message is in flight. Introducing a bidirectional `{ type: 'SUBSCRIBED' }` server confirmation eliminated intermittent test flakes.
 
 ---
 

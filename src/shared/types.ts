@@ -48,8 +48,13 @@ export interface AlertPayload {
   timeoutFallback: boolean;
 }
 
-export type QuickReplyText =
-  'Leave it at the door' | 'Coming in 2 minutes' | "I can't hear, please text me";
+export const ALLOWED_QUICK_REPLIES = [
+  'Leave it at the door',
+  'Coming in 2 minutes',
+  "I can't hear, please text me",
+] as const;
+
+export type QuickReplyText = (typeof ALLOWED_QUICK_REPLIES)[number];
 
 export interface QuickReplyMessage {
   eventId: string;
@@ -62,6 +67,7 @@ export type WebSocketClientMessage =
   | { type: 'QUICK_REPLY'; payload: QuickReplyMessage };
 
 export type WebSocketServerMessage =
+  | { type: 'SUBSCRIBED'; role: 'resident' | 'visitor' }
   | { type: 'ALERT_PHASE_1'; payload: AlertPayload }
   | { type: 'ALERT_PHASE_2'; payload: AlertPayload }
   | { type: 'VISITOR_REPLY_DISPLAY'; payload: { reply: string; timestamp: string } }

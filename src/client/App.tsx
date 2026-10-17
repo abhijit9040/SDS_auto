@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { useDoorbellSocket } from './hooks/useDoorbellSocket.js';
 import { ResidentAlert } from './components/ResidentAlert.js';
+import { VisitorScreen } from './components/VisitorScreen.js';
 
-export const App: React.FC = () => {
-  const { currentAlert, isConnected, clearAlert } = useDoorbellSocket('resident');
+const VisitorApp: React.FC = () => {
+  const { currentReply, isConnected } = useDoorbellSocket('visitor');
+  return <VisitorScreen currentReply={currentReply} isConnected={isConnected} />;
+};
+
+const ResidentApp: React.FC = () => {
+  const { currentAlert, isConnected, clearAlert, sendQuickReply, deliveredReply } =
+    useDoorbellSocket('resident');
   const [triggerStatus, setTriggerStatus] = useState<string>('');
 
   const handleSimulateDoorbell = async () => {
@@ -79,19 +86,41 @@ export const App: React.FC = () => {
           marginBottom: '1.5rem',
         }}
       >
-        <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '0.5rem' }}>
-          Simulator Controls (Hackathon Dev)
-        </h2>
-        <p
-          style={{
-            fontSize: 'var(--text-sm)',
-            color: 'var(--text-secondary)',
-            marginBottom: '1rem',
-          }}
-        >
-          Simulate a Ring doorbell press signed with HMAC-SHA256 to verify end-to-end alert
-          delivery.
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '0.25rem' }}>
+              Simulator Controls (Hackathon Dev)
+            </h2>
+            <p
+              style={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--text-secondary)',
+                marginBottom: '1rem',
+              }}
+            >
+              Simulate a Ring doorbell press signed with HMAC-SHA256 to verify end-to-end alert
+              delivery.
+            </p>
+          </div>
+          <a
+            href="/visitor"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              padding: '0.5rem 1rem',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 600,
+              color: 'var(--accent-cyan)',
+              border: '1px solid var(--accent-cyan)',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              display: 'inline-block',
+            }}
+          >
+            Open Visitor Screen ↗
+          </a>
+        </div>
+
         <button
           onClick={handleSimulateDoorbell}
           style={{
@@ -116,9 +145,15 @@ export const App: React.FC = () => {
         )}
       </section>
 
-      {/* Active Visual Alert */}
+      {/* Active Visual Alert with Two-Way Quick Replies */}
       {currentAlert && (
-        <ResidentAlert alert={currentAlert} onDismiss={clearAlert} flashEnabled={true} />
+        <ResidentAlert
+          alert={currentAlert}
+          onDismiss={clearAlert}
+          flashEnabled={true}
+          onSendReply={sendQuickReply}
+          deliveredReply={deliveredReply}
+        />
       )}
 
       {/* Idle Status Display */}
@@ -141,4 +176,15 @@ export const App: React.FC = () => {
       )}
     </main>
   );
+};
+
+export const App: React.FC = () => {
+  const isVisitorPath =
+    typeof window !== 'undefined' && window.location.pathname.startsWith('/visitor');
+
+  if (isVisitorPath) {
+    return <VisitorApp />;
+  }
+
+  return <ResidentApp />;
 };

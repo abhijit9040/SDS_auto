@@ -103,17 +103,19 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ---
 
-### Task 3: Two-Way Quick Replies, Visitor Screen & Video Checkpoint
+### [x] Task 3: Two-Way Quick Replies, Visitor Screen & Video Checkpoint
+*Two-way quick replies, /visitor screen, SQLite transaction logging, and DEMO_NOTES.md checkpoint.* [COMPLETED]
 - **Objective:**
   1. Resident taps one of 3 quick replies (*"Leave it at the door"*, *"Coming in 2 minutes"*, *"I can't hear, please text me"*).
   2. Send reply over WebSocket to dedicated visitor screen (`/visitor`), render message within $\le 1.5$ seconds, and log event transaction in SQLite (`better-sqlite3` / `node:sqlite`).
-  3. **Checkpoint:** Record a rough internal screen-recording checkpoint to validate end-to-end timing (<3 minutes) and visual flow.
+  3. **Checkpoint:** Record a rough internal screen-recording checkpoint to validate end-to-end timing (<3 minutes) and visual flow. Produced `DEMO_NOTES.md`.
 - **Files Touched:**
   - `src/server/db/index.ts`
   - `src/server/services/ws-hub.ts`
   - `src/client/components/QuickReplies.tsx`
   - `src/client/components/VisitorScreen.tsx`
   - `src/client/App.tsx`
+  - `DEMO_NOTES.md`
   - `tests/quick-reply.test.ts`
   - `FRICTION_LOG.md`
 - **Dependencies:** Task 1, Task 2.

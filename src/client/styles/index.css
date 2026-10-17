@@ -75,3 +75,19 @@ body {
 .strobe-alert {
   animation: safeStrobe 0.8s ease-in-out infinite;
 }
+
+/* Quick reply buttons (accessibility: >=48px target, high contrast, focus ring) */
+.quick-reply-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-color: var(--accent-cyan) !important;
+  transform: translateY(-2px);
+}
+
+.quick-reply-btn:focus-visible {
+  outline: 3px solid var(--accent-cyan) !important;
+  outline-offset: 3px !important;
+}
+
+.quick-reply-btn:active:not(:disabled) {
+  transform: translateY(0);
+}

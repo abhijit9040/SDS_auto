@@ -95,6 +95,22 @@ SignalDoor uses the Amazon Bedrock Converse API (`@aws-sdk/client-bedrock-runtim
   - `BEDROCK_MODEL_ID`: Configured multimodal model ID (e.g. `anthropic.claude-3-haiku-20240307-v1:0`)
   - `BEDROCK_TIMEOUT_MS`: Hard SLA timeout in ms (default: `5000`)
 
+---
+
+## Two-Way Quick Replies & Dedicated Visitor Screen (`/visitor`)
+
+Deaf residents can send instant responses to visitors without audio intercoms or typing:
+- **One-Tap Quick Replies:** Resident taps one of three accessible options ($\ge 48$px touch targets):
+  1. *"Leave it at the door"*
+  2. *"Coming in 2 minutes"*
+  3. *"I can't hear, please text me"*
+- **Server Whitelist Security:** The backend strictly accepts only allowed strings; arbitrary text is rejected.
+- **Dedicated Visitor Display (`/visitor`):** Shows large, high-contrast instructions with timestamps. Automatically resets to *"Waiting for response..."* when a subsequent visitor rings.
+- **SQLite Audit Logging:** All dispatched replies are persisted in SQLite (`node:sqlite`) tied to the doorbell event ID.
+- **Demo Script:** See [`DEMO_NOTES.md`](DEMO_NOTES.md) for a 3-minute step-by-step recording script.
+
+---
+
 ## Security & Privacy Notice
 
 - **Public Tunnel Restrictions:** If using a tunnel (e.g., ngrok) to receive external webhooks, only expose `/webhooks/ring`, `/ring/link`, and `/oauth/token`. Keep `/api/simulator/trigger` and WebSockets bound locally.

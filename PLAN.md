@@ -168,7 +168,8 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ---
 
-### Task 6: Hackathon Deliverables, Demo Video & Submission
+### [x] Task 6: Hackathon Deliverables, Demo Video & Submission
+*Final hackathon deliverables, documentation, demo script, feedback, and Devpost submission.* [COMPLETED]
 - **Objective:** Prepare and finalize all required hackathon deliverables (starts on Day 5, Oct 21):
   1. Finalize `README.md` with honest disclosure of `RING_MODE=emulator` vs live, architecture diagram, and quickstart.
   2. Final demo video ($\le 3$ minutes) demonstrating end-to-end doorbell press &rarr; immediate alert &rarr; Bedrock AI summary &rarr; quick reply on `/visitor` screen.

@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current stage: 6 (Stage 6 — Feature Implementation: current task = Task 6: Hackathon Deliverables, Demo Video & Submission)
+Current stage: 6 (Stage 6 — Feature Implementation: all Tasks 1–6 completed; ready for Stage 7 — Harden)
 Completed:
 - Stage 0: Idea Brief (`BRIEF.md` created, gate verified)
 - Stage 1: Requirements and Scope (`SPEC.md` created & amended, gate verified)
@@ -12,6 +12,8 @@ Completed:
 - Stage 6 (Task 3): Two-Way Quick Replies & Visitor Screen (`/visitor`) completed with strict server whitelist, SQLite audit logging (`node:sqlite`), `REPLY_ACK`, `>=48px` touch targets, stale reply reset, and `DEMO_NOTES.md` recording script
 - Stage 6 (Task 4): Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards completed with dynamic CSS contrast tests, axe-core audits, persistent alerts without auto-clear, $\le 2$ flashes/sec safe cycle, `prefers-reduced-motion` override, persistent user sensory toggle (`FlashToggle`), non-color-alone status badges, and mobile tactile vibration
 - Stage 6 (Task 5-lite): Ring Sandbox Compatibility & Mocked REST Client completed with official api.amazonvision.com endpoint contracts (devices & snapshots), exponential backoff for 429, distinct 401/403/404 handling, fail-fast boot validation, in-memory token safety, ring-sandbox payload compatibility, and 14 mocked tests
+- Stage 6 (Task 6): Hackathon Deliverables, Demo Video & Submission completed with finalized `README.md` (live vs emulator table, quickstart, architecture, accessibility, responsible-AI, licenses), `DEMO_SCRIPT.md` (3-minute split-screen walkthrough), finalized `PRODUCT_FEEDBACK.md` (requests for Ring and Bedrock), finalized `FRICTION_LOG.md` (observed friction only), and full `SUBMISSION.md` (Devpost fields drafted)
+
 
 Decisions:
 - Project Name: SignalDoor (Deaf-friendly Doorbell)

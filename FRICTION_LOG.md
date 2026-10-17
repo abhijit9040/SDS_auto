@@ -1,6 +1,7 @@
-# SignalDoor — Developer Friction Log & Product Feedback
+# SignalDoor — Developer Friction Log & Integration Learnings
 
-> **Purpose:** Document real-time developer friction, SDK/API ergonomics, and integration learnings while building SignalDoor for the Amazon Developer Hackathon (Ring Track + AWS Builder).
+> **Purpose:** Document real-time developer friction, SDK/API ergonomics, and integration learnings observed while building SignalDoor for the Amazon Developer Hackathon (Ring Track + AWS Builder).  
+> **Integrations:** Ring Partner API (`api.amazonvision.com`), `ring-sandbox`, Amazon Bedrock Converse API (`@aws-sdk/client-bedrock-runtime`), `node:sqlite`, and WCAG 2.1 AA / 2.3.1 accessibility.
 
 ---
 
@@ -8,15 +9,17 @@
 
 ### Task 1: Walking Skeleton Ingestion & HMAC Verification
 - **Express Raw Body Ingestion for HMAC:**
-  - *Friction:* Express's default `express.json()` parser consumes and decodes the stream directly into an object, discarding raw bytes. If you re-serialize with `JSON.stringify(req.body)`, key ordering or whitespace discrepancies break the HMAC-SHA256 digest comparison.
+  - *Observed Friction:* Express's default `express.json()` parser consumes and decodes the stream directly into an object, discarding raw bytes. If you re-serialize with `JSON.stringify(req.body)`, key ordering or whitespace discrepancies break the HMAC-SHA256 digest comparison.
   - *Solution:* Implemented `express.json({ verify: (req, _res, buf) => { (req as any).rawBody = buf; } })` to preserve the original payload buffer.
 - **Timing Safe Equal Guard:**
-  - *Friction:* Node's `crypto.timingSafeEqual(bufA, bufB)` crashes with `RangeError` if the two buffers have different byte lengths (e.g. if an attacker supplies an invalid hex length).
+  - *Observed Friction:* Node's `crypto.timingSafeEqual(bufA, bufB)` crashes with `RangeError` if the two buffers have different byte lengths (e.g. if an attacker supplies an invalid hex length).
   - *Solution:* Added an explicit buffer length equality check prior to executing `crypto.timingSafeEqual`.
 - **Request Deduplication & Webhook SLA:**
-  - *Learning:* Returning an immediate HTTP 200 upon verifying signature and checking `meta.request_id` prevents webhook retries, while downstream WebSocket dispatch runs asynchronously via `setImmediate`.
+  - *Observed Friction:* Webhook senders retry if an HTTP response is delayed by downstream processing.
+  - *Solution:* Returning an immediate HTTP 200 upon verifying signature and checking `meta.request_id` prevents webhook retries, while downstream WebSocket dispatch runs asynchronously via `setImmediate`.
 - **Ring Webhook Schema Nuances:**
-  - *Learning:* Ring's envelope schema uses `meta.time` (epoch millis) and `meta.version` rather than generic `timestamp` properties, while event data attributes can vary by device model. Designed payload interfaces with open index signatures to avoid fragile hard-coded assumptions.
+  - *Observed Friction:* Ring's envelope schema uses `meta.time` (epoch millis) and `meta.version` rather than generic `timestamp` properties, while event data attributes can vary by device model.
+  - *Solution:* Designed payload interfaces with open index signatures to avoid fragile hard-coded assumptions.
 
 ### Task 5-lite: ring-sandbox Compatibility & REST Client Implementation
 - **ring-sandbox Emulator Evaluation & License:**
@@ -29,7 +32,6 @@
     - Signature Header: Both conform to `X-Signature: sha256=<hex>` over raw JSON request body bytes.
   - *Outcome:* Compatibility verified in 15 minutes without vendoring or code duplication.
 - **Ring Partner REST Client (`api.amazonvision.com`):**
-  - *CORS Restriction:* Ring API endpoints enforce strict server-to-server security. Calling `api.amazonvision.com` directly from the browser triggers CORS errors, confirming the necessity of a backend gateway pattern.
   - *Exponential Backoff for Rate Limiting (429):* Implemented exponential backoff starting at 1.0s (`1s * 2^attempt`) and parsing the `Retry-After` header. Essential to avoid cascading failures if a doorbell generates multiple rapid events.
   - *Binary Media Streaming:* `POST /v1/devices/{deviceId}/media/image/download` returns raw binary JPEG/PNG streams with metadata in headers (`X-Media-Timestamp`, `Content-Type`) rather than base64 in a JSON body. Stream buffering into Node `Buffer` in memory provides zero-disk ephemeral processing.
   - *Fail-Fast Boot Guard:* When `RING_MODE=live`, the server checks for `RING_API_TOKEN` at startup and exits with an explicit descriptive error message if missing, avoiding silent failures during live events.
@@ -40,13 +42,13 @@
 
 ### Task 2: Multimodal Visitor Summaries & 5-Second SLA Fallback
 - **AbortController Integration with AWS SDK v3:**
-  - *Friction:* Bedrock inference latency can fluctuate based on region load and image payload size. To guarantee accessibility responsiveness for deaf users, the UI cannot wait indefinitely for AI enrichment.
+  - *Observed Friction:* Bedrock inference latency can fluctuate based on region load and image payload size. To guarantee accessibility responsiveness for deaf users, the UI cannot wait indefinitely for AI enrichment.
   - *Solution:* Wired an `AbortController` with a 5.0s timer (`config.bedrockTimeoutMs`) into `@aws-sdk/client-bedrock-runtime`'s `send(command, { abortSignal })`. When aborted, the error is caught cleanly and latency is logged, leaving the resident on the Phase 1 fallback alert text (`"Someone is at your door"`).
 - **In-Memory Zero-Disk Retention for Visitor Privacy:**
   - *Requirement:* Security and privacy demand that visitor camera frames are never written to temporary files or logged in plaintext.
   - *Solution:* Image bytes are ingested directly as Node.js `Buffer` in memory and passed into `ConverseCommandInput.messages[0].content[0].image.source.bytes`. Logging outputs device ID, event type, and latency in milliseconds, strictly omitting byte buffers and base64 strings.
 - **Converse API Output ContentBlock Schema:**
-  - *Friction:* AWS Bedrock's TypeScript types for `ContentBlock` represent a discriminated union without a uniform `.type` discriminator property (e.g. `{ text?: string } | { image?: ... }`). Checking `c.type === 'text'` resulted in TS2339.
+  - *Observed Friction:* AWS Bedrock's TypeScript types for `ContentBlock` represent a discriminated union without a uniform `.type` discriminator property (e.g. `{ text?: string } | { image?: ... }`). Checking `c.type === 'text'` resulted in TS2339.
   - *Solution:* Refactored extraction to use `'text' in c && typeof c.text === 'string'`, ensuring robust type-safe parsing across all Bedrock runtime versions.
 - **Prompt Isolation & Word-Limit Tightening:**
   - *Learning:* Housing the system prompt in a standalone text file (`bedrock-prompt.txt`) enabled rapid iteration of safety boundaries without touching core service code.
@@ -67,7 +69,7 @@
 
 ### Task 3: Two-Way Quick Replies & Visitor Screen Synchronization
 - **SQLite Ingestion with Node.js `node:sqlite`:**
-  - *Friction:* Traditional native SQLite bindings (such as `better-sqlite3` or `sqlite3`) frequently fail on Windows development machines due to missing Visual Studio C++ toolchains or Python node-gyp compilation errors.
+  - *Observed Friction:* Traditional native SQLite bindings (such as `better-sqlite3` or `sqlite3`) frequently fail on Windows development machines due to missing Visual Studio C++ toolchains or Python node-gyp compilation errors.
   - *Solution:* Utilized Node.js 22+'s built-in `node:sqlite` (`DatabaseSync`). It provides synchronous prepared statements, zero external native compilation requirements, and fast in-memory execution for unit tests (`:memory:`).
 - **Server-Side Whitelist Validation of Untrusted Clients:**
   - *Security Practice:* WebSocket client payloads cannot be trusted. If an adversary sends arbitrary strings or scripts via `QUICK_REPLY`, the backend strictly validates against `ALLOWED_QUICK_REPLIES` (`'Leave it at the door'`, `'Coming in 2 minutes'`, `"I can't hear, please text me"`). Any disallowed input is rejected immediately without DB insertion or visitor broadcast.
@@ -78,10 +80,10 @@
 
 ### Task 4: Accessibility Hardening, WCAG 2.3.1 Safeguards & Dynamic CSS Auditing
 - **Dynamic CSS Contrast Computation in Vitest:**
-  - *Friction:* Hard-coding contrast values in tests creates false positives when CSS stylesheets are refactored or themes change. Testing should derive contrast directly from live CSS variables.
+  - *Observed Friction:* Hard-coding contrast values in tests creates false positives when CSS stylesheets are refactored or themes change. Testing should derive contrast directly from live CSS variables.
   - *Solution:* Parsed `src/client/styles/index.css` in Vitest, extracted hex/rgb values for all foreground/background token pairs (including `:focus-visible` rings and disabled buttons), and calculated relative luminance ($L = 0.2126 R + 0.7152 G + 0.0722 B$) via the official W3C formula. Verified all text/background pairs achieve $\ge 4.5:1$ (e.g. `--text-primary` on `--bg-primary` achieves $19.3:1$, urgent banner achieves $15.4:1$, and card surfaces achieve $11.5:1$) and UI components achieve $\ge 3.0:1$ (focus rings achieve $9.0:1$).
 - **Automated `axe-core` Testing in JSDOM:**
-  - *Friction:* JSDOM does not calculate visual rendering coordinates or CSS cascades, so running `axe.run(container)` with default settings throws false negatives or incomplete results for layout-dependent rules like `color-contrast`.
+  - *Observed Friction:* JSDOM does not calculate visual rendering coordinates or CSS cascades, so running `axe.run(container)` with default settings throws false negatives or incomplete results for layout-dependent rules like `color-contrast`.
   - *Solution:* Scoped axe-core execution in JSDOM to semantic, ARIA, and DOM validity checks (`{ rules: { 'color-contrast': { enabled: false } } }`), while color contrast compliance was strictly enforced by the dynamic CSS mathematical contrast test suite.
 - **Epileptic Seizure Safeguards (WCAG 2.3.1) & Flash Timing:**
   - *Safety Threshold:* WCAG 2.3.1 strictly prohibits flashing greater than 3 times in any 1-second period.
@@ -92,14 +94,21 @@
 - **Adaptive Screen Reader Alerts (ARIA):**
   - *Implementation:* The initial visitor alert applies `role="alert"` and `aria-live="assertive"` for instantaneous screen reader notification. Downstream Phase 2 AI summary updates apply `role="status"` and `aria-live="polite"` so the enrichment is announced naturally without jarring interruptions.
 - **Non-Color-Alone Status Communication (WCAG 1.4.1):**
-  - *Learning:* Relying solely on green/red badges excludes colorblind users.
+  - *Observed Friction:* Relying solely on green/red badges excludes colorblind users.
   - *Solution:* Augmented all status badges and buttons with dual representation: explicit textual status coupled with unicode iconography (e.g., `✓ Online — Doorbell Connected`, `✕ Offline — Reconnecting...`, `✕ Dismiss Alert`).
 - **Mobile Tactile Feedback (`navigator.vibrate`):**
-  - *Learning:* Mobile browsers restrict tactile vibration (`navigator.vibrate`) unless preceded by user interaction or explicit permission; moreover, iOS Safari does not support the Vibration API.
+  - *Observed Friction:* Mobile browsers restrict tactile vibration (`navigator.vibrate`) unless preceded by user interaction or explicit permission; moreover, iOS Safari does not support the Vibration API.
   - *Solution:* Implemented a dedicated sensory toggle in `FlashToggle` for mobile tactile vibration (`[300, 150, 300, 150, 300]`), safely checking `typeof navigator.vibrate === 'function'` to gracefully degrade on iOS and desktop browsers.
 
 ---
 
-## 4. Overall Hackathon Summary & Recommendations
-*(Entries to be finalized during Task 6)*
+## 4. Overall Hackathon Summary & Integration Takeaways
 
+1. **Two-Phase Alerting is Essential for Assistive Tech:**
+   Combining an immediate visual notification (<2.0s) with downstream AI enrichment (<5.0s) guarantees that slow network connections or model inference latencies never compromise the user's primary awareness of a visitor.
+2. **Ephemeral In-Memory Privacy is Practical:**
+   Passing raw image buffers directly to Amazon Bedrock Converse API without disk persistence or database storage proves that rich multimodal AI can be deployed with zero-disk privacy guarantees.
+3. **Node.js 22 Built-ins Accelerate Development:**
+   Leveraging Node 22's built-in `node:sqlite` removed external native compilation hurdles across developer machines while providing synchronous SQLite transaction safety.
+4. **WCAG Compliance Requires Mathematical Rigor:**
+   Automated dynamic CSS contrast computation and seizure-safe flash timing (<2 flashes/sec) bridge the gap between design tokens and accessibility guarantees.

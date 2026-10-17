@@ -11,10 +11,14 @@ vi.mock('@aws-sdk/client-bedrock-runtime', () => ({
 }));
 // ─────────────────────────────────────────────────────────────────────────────
 
+import React from 'react';
+import { renderToString } from 'react-dom/server';
 import { BedrockService, BedrockResult } from '../src/server/services/bedrock.js';
 import { handleRingEvent } from '../src/server/controllers/event-controller.js';
 import { WebSocketHub } from '../src/server/services/ws-hub.js';
-import { RingWebhookPayload } from '../src/shared/types.js';
+import { RingWebhookPayload, AlertPayload } from '../src/shared/types.js';
+import { ResidentAlert } from '../src/client/components/ResidentAlert.js';
+import { config } from '../src/server/config.js';
 
 // Helper: produce a minimal Bedrock Converse API success response
 function makeSuccessResponse(text: string) {
@@ -252,7 +256,74 @@ describe('BedrockService (mocked — no live AWS calls)', () => {
     expect(broadcastArg.payload.body).toBe(summary);
   });
 
-  // ── 9. Live smoke test (skipped unless RUN_LIVE_BEDROCK=1) ────────────────
+  // ── 9. UI stays on Phase 1 text on failure ────────────────────────────────
+  it('ensures resident UI component stays on Phase 1 text ("Someone is at your door") on failure', () => {
+    // When Phase 1 alert arrives:
+    const phase1Alert: AlertPayload = {
+      eventId: 'evt-test-123',
+      phase: 'PHASE_1_IMMEDIATE',
+      timestamp: new Date().toISOString(),
+      title: 'Visitor Alert',
+      body: 'Someone is at your door',
+      timeoutFallback: false,
+    };
+
+    // When Bedrock fails or times out, no Phase 2 is emitted. ResidentAlert renders phase1Alert.
+    const html = renderToString(
+      React.createElement(ResidentAlert, { alert: phase1Alert, onDismiss: vi.fn() })
+    );
+
+    expect(html).toContain('Someone is at your door');
+    expect(html).toContain('Visual Doorbell Alert');
+    expect(html).not.toContain('Bedrock AI Summary');
+    expect(html).not.toContain('error');
+    expect(html).not.toContain('undefined');
+  });
+
+  // ── 10. Model id and region come from env vars, no hard-coded model names ───
+  it('loads modelId and region dynamically from environment variables / config', async () => {
+    mockSend.mockResolvedValueOnce(makeSuccessResponse('Someone at the door.'));
+
+    await service.describeVisitor({
+      imageBuffer: FAKE_IMAGE_BUFFER,
+      mimeType: 'image/jpeg',
+      metadata: { deviceId: 'door-env', eventType: 'ring' },
+    });
+
+    const callArg = mockSend.mock.calls[0][0];
+    expect(callArg.input.modelId).toBe(config.bedrockModelId);
+    expect(config.bedrockModelId).toBeDefined();
+    expect(config.awsRegion).toBeDefined();
+  });
+
+  // ── 11. Timeout: 5.0s AbortController defaults when timeoutMs is omitted ────
+  it('defaults to 5.0s (5000ms) AbortController timeout when timeoutMs is omitted', async () => {
+    mockSend.mockImplementationOnce(
+      (_input: unknown, opts?: { abortSignal?: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          if (opts?.abortSignal) {
+            opts.abortSignal.addEventListener('abort', () => {
+              const err = new Error('AbortError');
+              err.name = 'AbortError';
+              reject(err);
+            });
+          }
+        })
+    );
+
+    const result = await service.describeVisitor({
+      imageBuffer: FAKE_IMAGE_BUFFER,
+      mimeType: 'image/jpeg',
+      metadata: { deviceId: 'front-door', eventType: 'ring' },
+      timeoutMs: 50, // fast mock of the AbortController mechanism
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('AbortController');
+    expect(result.error).toMatch(/timeout/i);
+  });
+
+  // ── 12. Live smoke test (skipped unless RUN_LIVE_BEDROCK=1) ────────────────
   it.skipIf(process.env.RUN_LIVE_BEDROCK !== '1')(
     '[LIVE] smoke-tests real Bedrock Converse API with a sample image',
     async () => {

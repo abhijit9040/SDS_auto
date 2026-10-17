@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current stage: 6 (Stage 6 — Feature Implementation: current task = Task 5-lite: Ring Sandbox Compatibility & Mocked REST Client)
+Current stage: 6 (Stage 6 — Feature Implementation: current task = Task 6: Hackathon Deliverables, Demo Video & Submission)
 Completed:
 - Stage 0: Idea Brief (`BRIEF.md` created, gate verified)
 - Stage 1: Requirements and Scope (`SPEC.md` created & amended, gate verified)
@@ -11,6 +11,7 @@ Completed:
 - Stage 6 (Task 2): Bedrock AI Multimodal Phase 2 Enrichment completed with 5s timeout fallback, AbortController, prompt isolation, zero-disk in-memory processing, clean fallback rejection for >25 words, and prompt tightened to 20 words
 - Stage 6 (Task 3): Two-Way Quick Replies & Visitor Screen (`/visitor`) completed with strict server whitelist, SQLite audit logging (`node:sqlite`), `REPLY_ACK`, `>=48px` touch targets, stale reply reset, and `DEMO_NOTES.md` recording script
 - Stage 6 (Task 4): Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards completed with dynamic CSS contrast tests, axe-core audits, persistent alerts without auto-clear, $\le 2$ flashes/sec safe cycle, `prefers-reduced-motion` override, persistent user sensory toggle (`FlashToggle`), non-color-alone status badges, and mobile tactile vibration
+- Stage 6 (Task 5-lite): Ring Sandbox Compatibility & Mocked REST Client completed with official api.amazonvision.com endpoint contracts (devices & snapshots), exponential backoff for 429, distinct 401/403/404 handling, fail-fast boot validation, in-memory token safety, ring-sandbox payload compatibility, and 14 mocked tests
 
 Decisions:
 - Project Name: SignalDoor (Deaf-friendly Doorbell)
@@ -24,9 +25,10 @@ Decisions:
   * Payload types: `meta.time`, `meta.version`, `meta.request_id`, `meta.account_id`; `data.id`, `data.type`, `data.attributes.source`, `data.attributes.timestamp` (flexible attributes)
   * Emulator signs its webhooks with the configured secret
 - Ring Sandbox & Mocked Client (Task 5-lite):
-  * Test compatibility of `ring-sandbox` emulator against `/webhooks/ring`
-  * Ring Image Snapshots + devices REST client accompanied by clearly labeled mocked tests (not live-tested against production Ring servers)
-  * Defer live OAuth unless official Ring production approval is explicitly confirmed
+  * Test compatibility of `ring-sandbox` emulator against `/webhooks/ring` verified in 15 minutes; handles ISO `meta.time`, `source_type`, and `relationships`
+  * Ring Image Snapshots + devices REST client (`RingRestClient`) implemented for `api.amazonvision.com` with exponential backoff on 429, distinct 401/403/404/timeout error classes, and fail-fast startup guard
+  * All tests and documentation clearly labeled as synthetic/mocked (not live-tested against production Ring servers)
+  * Deferred live OAuth unless official Ring production partner approval is explicitly granted
   * Schedule compressed to submit by October 21
 - Two-Phase Alerting: Immediate Phase 1 notification (<2.0s) with fallback text, Phase 2 enrichment (<5.0s) with Bedrock summary
 - Bedrock Multimodal Enrichment:

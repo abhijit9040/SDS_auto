@@ -111,6 +111,30 @@ Deaf residents can send instant responses to visitors without audio intercoms or
 
 ---
 
+## Ring Partner REST Client & Offline Emulator (mocked, not live-tested against Ring servers)
+
+SignalDoor includes a resilient TypeScript client ([`RingRestClient`](file:///c:/Users/Abhijit/OneDrive/Documents/amzon/src/server/services/ring-rest-client.ts)) implementing the official Ring Partner API specification (`api.amazonvision.com`):
+
+- **Endpoints Implemented:**
+  - **Device Discovery:** `GET /v1/devices` ([Docs](https://developer.amazon.com/docs/ring/devices-api.html#list-devices)) — JSON:API device listing.
+  - **Device Details:** `GET /v1/devices/{deviceId}` ([Docs](https://developer.amazon.com/docs/ring/devices-api.html#get-device)) — Retrieve doorbell capabilities and metadata.
+  - **Image Snapshots:** `POST /v1/devices/{deviceId}/media/image/download` ([Docs](https://developer.amazon.com/docs/ring/media-api.html#download-image-snapshot)) — Binary JPEG/PNG snapshot retrieval with `X-Media-Timestamp`.
+- **Resilient Error Handling & Rate Limiting:**
+  - **HTTP 429 Backoff:** Implements exponential backoff starting at 1.0s (`1s * 2^attempt`) and strictly honors `Retry-After` headers.
+  - **Distinct Error Classes:** Granular `RingAuthError` (401), `RingForbiddenError` (403), `RingNotFoundError` (404), `RingRateLimitError` (429), and `RingTimeoutError` (timeout).
+  - **Fail-Fast Startup:** When `RING_MODE=live`, the server validates `RING_API_TOKEN` at boot; if absent, it halts with a clear configuration message instead of crashing during live doorbell events.
+  - **Token Privacy:** Bearer tokens are kept in memory and never logged, serialized, or exposed in error messages.
+- **Offline Emulator (`ring-sandbox`):**
+  - **License:** MIT License (Author: Joseph Mayo).
+  - **Run as Separate Dev Process:**
+    ```bash
+    npm run sandbox:serve
+    # or: python -m ring_sandbox.cli serve --port 8787
+    ```
+  - **Webhook Compatibility:** Validated that `ring-sandbox` v1.1 event payloads (ISO-8601 `meta.time`, `data.attributes.source_type`, and JSON:API `data.relationships`) pass HMAC verification and request deduplication in `POST /webhooks/ring`.
+
+---
+
 ## Accessibility & WCAG 2.1 AA Compliance
 
 SignalDoor is engineered from the ground up for deaf and hard-of-hearing residents and adheres strictly to WCAG 2.1 Level AA and WCAG 2.3.1 requirements:

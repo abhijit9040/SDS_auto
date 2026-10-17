@@ -3,7 +3,7 @@ export type EventType = 'ring' | 'motion' | 'test';
 
 export interface RingWebhookMeta {
   version?: string;
-  time?: number;
+  time?: number | string;
   account_id: string;
   request_id: string;
 }
@@ -11,6 +11,7 @@ export interface RingWebhookMeta {
 export interface RingWebhookDataAttributes {
   source: string;
   timestamp: number;
+  source_type?: string;
   [key: string]: unknown;
 }
 
@@ -18,11 +19,42 @@ export interface RingWebhookData {
   id: string;
   type: string; // e.g. 'button_press'
   attributes: RingWebhookDataAttributes;
+  relationships?: Record<string, unknown>;
 }
 
 export interface RingWebhookPayload {
   meta: RingWebhookMeta;
   data: RingWebhookData;
+}
+
+export interface RingDeviceAttributes {
+  name: string;
+  image_url?: string;
+  [key: string]: unknown;
+}
+
+export interface RingDevice {
+  id: string;
+  type: string;
+  attributes: RingDeviceAttributes;
+  relationships?: Record<string, unknown>;
+}
+
+export interface RingSnapshotOptions {
+  type?: 'latest_in_range' | 'at_timestamp';
+  startTimestamp?: number;
+  endTimestamp?: number;
+  timestamp?: number;
+  format?: 'jpeg' | 'png';
+  width?: number;
+  height?: number;
+  componentId?: string;
+}
+
+export interface RingSnapshotResult {
+  imageBuffer: Buffer;
+  contentType: string;
+  timestamp?: number;
 }
 
 export interface VisitorEvent {

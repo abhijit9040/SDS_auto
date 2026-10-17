@@ -3,6 +3,8 @@ import http from 'http';
 import { config } from './config.js';
 import { WebSocketHub } from './services/ws-hub.js';
 import { SimulatorAdapter } from './adapters/ring-simulator-adapter.js';
+import { RingApiAdapter } from './adapters/ring-api-adapter.js';
+import { RingAdapter } from './adapters/ring-adapter.interface.js';
 import { createRingWebhookRouter } from './routes/ring-webhook.js';
 import { handleRingEvent } from './controllers/event-controller.js';
 import { AlertPayload } from '../shared/types.js';
@@ -23,10 +25,32 @@ app.use(
 const wsHub = new WebSocketHub();
 wsHub.attach(server);
 
-// Initialize Ring Adapter (SimulatorAdapter for emulator mode)
+// Initialize Ring Adapter based on RING_MODE
 const serverBaseUrl = `http://localhost:${config.port}`;
-const simulatorAdapter = new SimulatorAdapter(serverBaseUrl, config.ringWebhookSecret);
-const ringAdapter = simulatorAdapter; // Default emulator adapter
+let ringAdapter: RingAdapter;
+let simulatorAdapter: SimulatorAdapter | null = null;
+let apiAdapter: RingApiAdapter | null = null;
+
+if (config.ringMode === 'live') {
+  apiAdapter = new RingApiAdapter({
+    token: config.ringApiToken,
+    baseUrl: config.ringApiBaseUrl,
+    timeoutMs: config.ringRequestTimeoutMs,
+  });
+  ringAdapter = apiAdapter;
+
+  // Fail fast on missing token in live mode
+  if (!config.ringApiToken || config.ringApiToken.trim() === '') {
+    throw new Error(
+      "Startup Error [RingApiAdapter]: RING_MODE is set to 'live' but RING_API_TOKEN is missing or empty. " +
+        'Provide a valid Ring Partner API Bearer token via the RING_API_TOKEN environment variable, ' +
+        'or set RING_MODE=emulator to use the local/sandbox emulator.'
+    );
+  }
+} else {
+  simulatorAdapter = new SimulatorAdapter(serverBaseUrl, config.ringWebhookSecret);
+  ringAdapter = simulatorAdapter;
+}
 
 // Register Ring Webhook receiver with HMAC verification & immediate 200
 app.use(
@@ -49,6 +73,15 @@ app.use(
       // 2. Emit normalized event to adapter listeners
       if (simulatorAdapter) {
         await simulatorAdapter.emitVisitorEvent(payload);
+      } else if (apiAdapter) {
+        await apiAdapter.emitVisitorEvent({
+          id: payload.data.id,
+          timestamp: new Date(payload.data.attributes.timestamp || Date.now()).toISOString(),
+          eventType: payload.data.type === 'button_press' ? 'ring' : 'test',
+          metadata: {
+            deviceId: payload.data.attributes.source,
+          },
+        });
       }
 
       // 3. Async Phase 2: Bedrock AI enrichment (5 s timeout, failure-safe)
@@ -66,6 +99,11 @@ app.post('/api/simulator/trigger', async (req, res) => {
 
   if (!isLocal && authHeader !== config.internalDevSecret) {
     res.status(403).json({ error: 'Forbidden: internal simulator endpoint is protected' });
+    return;
+  }
+
+  if (!simulatorAdapter) {
+    res.status(400).json({ error: 'Simulator endpoint is disabled when RING_MODE=live' });
     return;
   }
 
@@ -97,4 +135,4 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-export { app, server, wsHub, ringAdapter, simulatorAdapter };
+export { app, server, wsHub, ringAdapter, simulatorAdapter, apiAdapter };

@@ -143,23 +143,28 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ---
 
-### Task 5-lite: Ring Sandbox Compatibility & Mocked REST Client
-*Focused Ring integration without unapproved live OAuth dependencies.*
+### [x] Task 5-lite: Ring Sandbox Compatibility & Mocked REST Client
+*Focused Ring integration without unapproved live OAuth dependencies.* [COMPLETED]
 - **Objective:**
-  1. **ring-sandbox Compatibility:** Test payload compatibility of the open-source `ring-sandbox` emulator against `POST /webhooks/ring`, validating HMAC signing, payload format, and event parsing.
-  2. **Ring Image Snapshots + Devices REST Client:** Implement `RingApiAdapter` / client for `api.amazonvision.com` (device discovery and image snapshot retrieval) accompanied by comprehensive mocked tests (`tests/ring-api-adapter.test.ts`). Clearly label and annotate all tests as mocked/synthetic (not live-tested against production Ring servers).
+  1. **ring-sandbox Compatibility:** Test payload compatibility of the open-source `ring-sandbox` emulator against `POST /webhooks/ring`, validating HMAC signing, payload format, and event parsing. Verified that ISO `meta.time`, `source_type`, and `relationships` are parsed without error.
+  2. **Ring Image Snapshots + Devices REST Client:** Implement `RingApiAdapter` / client for `api.amazonvision.com` (device discovery and image snapshot retrieval) accompanied by comprehensive mocked tests (`tests/ring-api-adapter.test.ts`). Clearly labeled and annotated all tests as mocked/synthetic (not live-tested against production Ring servers).
   3. **No OAuth Gate:** Defer live OAuth flow (`/ring/link`, `/oauth/token`) unless official Ring production partner approval is explicitly confirmed. Focus purely on clean REST client contracts and emulator compatibility.
   4. Ensure sample images are watermarked to simulate live Ring Image Snapshots API output.
 - **Files Touched:**
+  - `src/server/services/ring-rest-client.ts`
   - `src/server/adapters/ring-api-adapter.ts`
   - `src/server/adapters/ring-adapter.interface.ts`
+  - `src/server/index.ts`
+  - `src/server/config.ts`
+  - `src/shared/types.ts`
   - `tests/ring-api-adapter.test.ts`
   - `FRICTION_LOG.md`
+  - `PRODUCT_FEEDBACK.md`
   - `README.md`
 - **Dependencies:** Tasks 1–4.
 - **Verification Command:** `npm test -- tests/ring-api-adapter.test.ts`
 - **Estimate:** 3.5 hours
-- **Recurring Step:** Update `FRICTION_LOG.md` with emulator findings.
+- **Recurring Step:** Update `FRICTION_LOG.md` and `PRODUCT_FEEDBACK.md` with emulator and API findings.
 
 ---
 

@@ -19,7 +19,9 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\" \"tests/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\" \"tests/**/*.{ts,tsx}\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sandbox:serve": "python -m ring_sandbox.cli serve --port 8787",
+    "sandbox:play": "python -m ring_sandbox.cli play delivery"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.750.0",

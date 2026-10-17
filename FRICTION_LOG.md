@@ -18,6 +18,22 @@
 - **Ring Webhook Schema Nuances:**
   - *Learning:* Ring's envelope schema uses `meta.time` (epoch millis) and `meta.version` rather than generic `timestamp` properties, while event data attributes can vary by device model. Designed payload interfaces with open index signatures to avoid fragile hard-coded assumptions.
 
+### Task 5-lite: ring-sandbox Compatibility & REST Client Implementation
+- **ring-sandbox Emulator Evaluation & License:**
+  - *Setup:* Evaluated `ring-sandbox` (v0.5.0, PyPI, MIT License by Joseph Mayo) as a separate offline development process (`python -m ring_sandbox.cli serve --port 8787`).
+  - *Payload Differences & Reconciliation:*
+    - `meta.version`: Ring developer guide docs illustrate `"1.0"`; `ring-sandbox` emits `"1.1"`. Reconciled parser using flexible `version?: string`.
+    - `meta.time`: Ring documentation examples use epoch milliseconds (e.g. `1729000000000`), whereas `ring-sandbox` emits UTC ISO-8601 timestamps (`"2026-10-17T11:10:52.469284Z"`). Reconciled TypeScript definition to `time?: number | string` and ensured `new Date(...)` parsing handles both seamlessly.
+    - `data.attributes.source_type`: `ring-sandbox` explicitly includes `"source_type": "devices"`.
+    - `data.relationships`: Emitted as a JSON:API relationship structure (`devices.links.self = "/v1/devices/<device_id>"`).
+    - Signature Header: Both conform to `X-Signature: sha256=<hex>` over raw JSON request body bytes.
+  - *Outcome:* Compatibility verified in 15 minutes without vendoring or code duplication.
+- **Ring Partner REST Client (`api.amazonvision.com`):**
+  - *CORS Restriction:* Ring API endpoints enforce strict server-to-server security. Calling `api.amazonvision.com` directly from the browser triggers CORS errors, confirming the necessity of a backend gateway pattern.
+  - *Exponential Backoff for Rate Limiting (429):* Implemented exponential backoff starting at 1.0s (`1s * 2^attempt`) and parsing the `Retry-After` header. Essential to avoid cascading failures if a doorbell generates multiple rapid events.
+  - *Binary Media Streaming:* `POST /v1/devices/{deviceId}/media/image/download` returns raw binary JPEG/PNG streams with metadata in headers (`X-Media-Timestamp`, `Content-Type`) rather than base64 in a JSON body. Stream buffering into Node `Buffer` in memory provides zero-disk ephemeral processing.
+  - *Fail-Fast Boot Guard:* When `RING_MODE=live`, the server checks for `RING_API_TOKEN` at startup and exits with an explicit descriptive error message if missing, avoiding silent failures during live events.
+
 ---
 
 ## 2. Amazon Bedrock Converse API Experience

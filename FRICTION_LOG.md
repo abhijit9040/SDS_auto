@@ -60,7 +60,40 @@
 - **WebSocket Handshake Determinism in Automated Tests:**
   - *Testing Learning:* In high-speed tests, calling `broadcast` immediately after `ws.on('open')` causes race conditions because the subscription message is in flight. Introducing a bidirectional `{ type: 'SUBSCRIBED' }` server confirmation eliminated intermittent test flakes.
 
+### Task 4: Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards
+- **WCAG 2.3.1 Flashing Safeguards & Photosensitive Seizure Prevention:**
+  - *SLA & Rate Cap:* Flashing alarms for deaf users risk triggering photosensitive seizures if frequency approaches 3 flashes per second. We capped `.strobe-alert` at $\le 2$ flashes/second (0.8s duration = 1.25 Hz), strictly below the 3.0 Hz threshold.
+  - *System & In-App Coordination:* System-level `prefers-reduced-motion: reduce` unconditionally strips all strobe animations via CSS (`animation: none !important;`), while JavaScript initializes user preferences to disabled if reduced motion is requested.
+  - *Persistent In-App Control:* Built `FlashToggle` switch with `localStorage` persistence (`signaldoor_flash_enabled`), explicit touch targets ($\ge 48$px), and ARIA switch attributes (`role="switch"`, `aria-checked`, `aria-label`).
+- **Typography & Distant Legibility:**
+  - *Design Choice:* Deaf individuals often view notification monitors from across a living room or kitchen. Body text is locked to $\ge 24$px (`var(--text-xl)`), and alert headers to $\ge 32$px (`var(--text-2xl)`).
+  - *Contrast Verification:* Relative luminance audits confirmed contrast ratios far exceeding WCAG AA ($\ge 4.5:1$): urgent alert banner `#450a0a` with white text yields $16.2:1$, primary background `#0a0e17` with white text yields $19.3:1$, and cyan call-to-action buttons yield $8.8:1$.
+- **Automated Accessibility Testing with axe-core:**
+  - *Friction:* Running `axe.run` in headless environments (JSDOM) lacks computed color layout engines, triggering false negatives or canvas errors on color contrast rules.
+  - *Solution:* Split audit into two rigorous layers: automated mathematical relative-luminance / contrast ratio assertions in TypeScript, plus `axe.run()` DOM node scanning to assert zero critical or serious ARIA/markup violations across `ResidentAlert`, `FlashToggle`, `QuickReplies`, and `VisitorScreen`.
+
+### Task 4: Accessibility Hardening, WCAG 2.3.1 Safeguards & Dynamic CSS Auditing
+- **Dynamic CSS Contrast Computation in Vitest:**
+  - *Friction:* Hard-coding contrast values in tests creates false positives when CSS stylesheets are refactored or themes change. Testing should derive contrast directly from live CSS variables.
+  - *Solution:* Parsed `src/client/styles/index.css` in Vitest, extracted hex/rgb values for all foreground/background token pairs (including `:focus-visible` rings and disabled buttons), and calculated relative luminance ($L = 0.2126 R + 0.7152 G + 0.0722 B$) via the official W3C formula. Verified all text/background pairs achieve $\ge 4.5:1$ (e.g. `--text-primary` on `--bg-primary` achieves $18.3:1$) and UI components achieve $\ge 3.0:1$.
+- **Automated `axe-core` Testing in JSDOM:**
+  - *Friction:* JSDOM does not calculate visual rendering coordinates or CSS cascades, so running `axe.run(container)` with default settings throws false negatives or incomplete results for layout-dependent rules like `color-contrast`.
+  - *Solution:* Scoped axe-core execution in JSDOM to semantic, ARIA, and DOM validity checks (`{ rules: { 'color-contrast': { enabled: false } } }`), while color contrast compliance was strictly enforced by the dynamic CSS mathematical contrast test suite.
+- **Epileptic Seizure Safeguards (WCAG 2.3.1) & Flash Timing:**
+  - *Safety Threshold:* WCAG 2.3.1 strictly prohibits flashing greater than 3 times in any 1-second period.
+  - *Solution:* Configured visual alert animations to a safe $0.8$s cycle (1.25 flashes/sec, strictly $\le 2$ flashes/sec). Added `@media (prefers-reduced-motion: reduce)` with `animation: none !important;` to auto-disable strobe effects at the operating system level, alongside an in-app `FlashToggle` with `localStorage` persistence and safe first-time user defaults.
+- **Deaf Alert Persistence vs Auto-Dismiss Toasts:**
+  - *Accessibility Requirement:* In hearing apps, notifications frequently disappear after 5 seconds because an audible chime notified the resident. For deaf or hard-of-hearing residents, looking away or blinking could result in missing an entire delivery.
+  - *Solution:* Enforced strict persistence: `ResidentAlert` never self-clears or uses `setTimeout` auto-dismissals. It remains visible on screen until the resident manually clicks the clearly labeled, $\ge 48$px touch target `✕ Dismiss Alert` button.
+- **Non-Color-Alone Status Communication (WCAG 1.4.1):**
+  - *Learning:* Relying solely on green/red badges excludes colorblind users.
+  - *Solution:* Augmented all status badges and buttons with dual representation: explicit textual status coupled with unicode iconography (e.g., `✓ Online — Doorbell Connected`, `✕ Offline — Reconnecting...`, `✕ Dismiss Alert`).
+- **Mobile Tactile Feedback (`navigator.vibrate`):**
+  - *Learning:* Mobile browsers restrict tactile vibration (`navigator.vibrate`) unless preceded by user interaction or explicit permission.
+  - *Solution:* Implemented a dedicated sensory toggle in `FlashToggle` for mobile tactile vibration (`[300, 150, 300, 150, 300]`), seamlessly respecting both browser permissions and user preference.
+
 ---
 
 ## 4. Overall Hackathon Summary & Recommendations
 *(Entries to be finalized during Task 6)*
+

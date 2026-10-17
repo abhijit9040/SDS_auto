@@ -246,8 +246,9 @@ describe('BedrockService (mocked — no live AWS calls)', () => {
     expect(result.phase2Sent).toBe(true);
     expect(result.summary).toBe(summary);
     expect(mockWsHub.broadcastToResidents).toHaveBeenCalledTimes(1);
-    const broadcastArg = (mockWsHub.broadcastToResidents as unknown as { mock: { calls: unknown[][] } })
-      .mock.calls[0][0] as { type: string; payload: { body: string; phase: string } };
+    const broadcastArg = (
+      mockWsHub.broadcastToResidents as unknown as { mock: { calls: unknown[][] } }
+    ).mock.calls[0][0] as { type: string; payload: { body: string; phase: string } };
     expect(broadcastArg.type).toBe('ALERT_PHASE_2');
     expect(broadcastArg.payload.phase).toBe('PHASE_2_ENRICHED');
     expect(broadcastArg.payload.body).toBe(summary);

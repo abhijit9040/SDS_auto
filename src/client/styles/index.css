@@ -57,6 +57,9 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .strobe-alert {
+    animation: none !important;
+  }
 }
 
 /* Safe flash animation (maximum 2 flashes per second, well under WCAG 2.3.1 3/s threshold) */
@@ -90,4 +93,35 @@ body {
 
 .quick-reply-btn:active:not(:disabled) {
   transform: translateY(0);
+}
+
+/* Toggle and dismiss buttons focus & hover states */
+.accessibility-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.accessibility-toggle-btn:focus-visible {
+  outline: 3px solid var(--accent-cyan) !important;
+  outline-offset: 3px !important;
+}
+
+.dismiss-alert-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dismiss-alert-btn:focus-visible {
+  outline: 3px solid #ffffff !important;
+  outline-offset: 3px !important;
+}
+
+/* Responsive layout & 200% zoom protection (prevent horizontal overflow down to 320px) */
+main,
+section,
+div,
+p,
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }

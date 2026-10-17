@@ -44,12 +44,13 @@ export const VisitorScreen: React.FC<VisitorScreenProps> = ({
       >
         <span
           style={{
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            backgroundColor: isConnected ? 'var(--alert-success)' : 'var(--alert-urgent)',
+            fontSize: 'var(--text-sm)',
+            fontWeight: 800,
+            color: isConnected ? 'var(--alert-success)' : 'var(--alert-urgent)',
           }}
-        />
+        >
+          {isConnected ? '✓' : '✕'}
+        </span>
         <span style={{ fontWeight: 600 }}>
           {isConnected ? 'Doorbell Display Active' : 'Connecting to Doorbell...'}
         </span>

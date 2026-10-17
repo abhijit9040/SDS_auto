@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDoorbellSocket } from './hooks/useDoorbellSocket.js';
 import { ResidentAlert } from './components/ResidentAlert.js';
 import { VisitorScreen } from './components/VisitorScreen.js';
+import {
+  FlashToggle,
+  getInitialFlashPreference,
+  saveFlashPreference,
+} from './components/FlashToggle.js';
 
 const VisitorApp: React.FC = () => {
   const { currentReply, isConnected } = useDoorbellSocket('visitor');
@@ -12,6 +17,45 @@ const ResidentApp: React.FC = () => {
   const { currentAlert, isConnected, clearAlert, sendQuickReply, deliveredReply } =
     useDoorbellSocket('resident');
   const [triggerStatus, setTriggerStatus] = useState<string>('');
+
+  // Sensory preferences with localStorage persistence and safe reduced-motion default
+  const [flashEnabled, setFlashEnabled] = useState<boolean>(() => getInitialFlashPreference());
+
+  const [vibrateEnabled, setVibrateEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('signaldoor_vibrate_enabled');
+      if (stored !== null) return stored === 'true';
+    }
+    return true;
+  });
+
+  const handleToggleFlash = (val: boolean) => {
+    setFlashEnabled(val);
+    saveFlashPreference(val);
+  };
+
+  const handleToggleVibrate = (val: boolean) => {
+    setVibrateEnabled(val);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('signaldoor_vibrate_enabled', String(val));
+    }
+  };
+
+  // Mobile haptic alert via navigator.vibrate
+  useEffect(() => {
+    if (
+      currentAlert &&
+      vibrateEnabled &&
+      typeof navigator !== 'undefined' &&
+      'vibrate' in navigator
+    ) {
+      try {
+        navigator.vibrate([300, 150, 300, 150, 300]);
+      } catch {
+        // Ignore environments that restrict programmatic vibration
+      }
+    }
+  }, [currentAlert, vibrateEnabled]);
 
   const handleSimulateDoorbell = async () => {
     setTriggerStatus('Triggering simulator...');
@@ -39,6 +83,8 @@ const ResidentApp: React.FC = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
           marginBottom: '1.5rem',
         }}
       >
@@ -52,6 +98,8 @@ const ResidentApp: React.FC = () => {
             Deaf-friendly smart doorbell interface
           </p>
         </div>
+
+        {/* Accessible Connection Status Badge (Symbol + Text, not color alone) */}
         <div
           style={{
             display: 'flex',
@@ -66,15 +114,26 @@ const ResidentApp: React.FC = () => {
         >
           <span
             style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: isConnected ? 'var(--alert-success)' : 'var(--alert-urgent)',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 800,
+              color: isConnected ? 'var(--alert-success)' : 'var(--alert-urgent)',
             }}
-          />
-          <span>{isConnected ? 'Doorbell Connected' : 'Connecting...'}</span>
+          >
+            {isConnected ? '✓' : '✕'}
+          </span>
+          <span style={{ fontWeight: 600 }}>
+            {isConnected ? 'Online — Doorbell Connected' : 'Offline — Connecting to Doorbell...'}
+          </span>
         </div>
       </header>
+
+      {/* Sensory Accessibility Controls (Flash & Vibration Toggles) */}
+      <FlashToggle
+        flashEnabled={flashEnabled}
+        vibrateEnabled={vibrateEnabled}
+        onToggleFlash={handleToggleFlash}
+        onToggleVibrate={handleToggleVibrate}
+      />
 
       {/* Simulator Control Panel */}
       <section
@@ -86,7 +145,15 @@ const ResidentApp: React.FC = () => {
           marginBottom: '1.5rem',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+          }}
+        >
           <div>
             <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '0.25rem' }}>
               Simulator Controls (Hackathon Dev)
@@ -107,6 +174,7 @@ const ResidentApp: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             style={{
+              minHeight: '44px',
               padding: '0.5rem 1rem',
               fontSize: 'var(--text-sm)',
               fontWeight: 600,
@@ -114,7 +182,8 @@ const ResidentApp: React.FC = () => {
               border: '1px solid var(--accent-cyan)',
               borderRadius: '6px',
               textDecoration: 'none',
-              display: 'inline-block',
+              display: 'inline-flex',
+              alignItems: 'center',
             }}
           >
             Open Visitor Screen ↗
@@ -122,8 +191,10 @@ const ResidentApp: React.FC = () => {
         </div>
 
         <button
+          type="button"
           onClick={handleSimulateDoorbell}
           style={{
+            minHeight: '48px',
             padding: '0.75rem 1.5rem',
             fontSize: 'var(--text-base)',
             fontWeight: 700,
@@ -145,12 +216,12 @@ const ResidentApp: React.FC = () => {
         )}
       </section>
 
-      {/* Active Visual Alert with Two-Way Quick Replies */}
+      {/* Active Visual Alert with Two-Way Quick Replies — Persists Until Explicitly Dismissed */}
       {currentAlert && (
         <ResidentAlert
           alert={currentAlert}
           onDismiss={clearAlert}
-          flashEnabled={true}
+          flashEnabled={flashEnabled}
           onSendReply={sendQuickReply}
           deliveredReply={deliveredReply}
         />

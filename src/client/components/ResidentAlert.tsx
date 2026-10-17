@@ -92,19 +92,26 @@ export const ResidentAlert: React.FC<ResidentAlertProps> = ({
 
       <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
         <button
+          type="button"
           onClick={onDismiss}
+          className="dismiss-alert-btn"
           style={{
-            padding: '0.75rem 1.5rem',
+            minHeight: '48px', // Accessible touch target >= 48px
+            padding: '0.75rem 1.75rem',
             fontSize: 'var(--text-base)',
             fontWeight: 700,
-            borderRadius: '6px',
+            borderRadius: '8px',
             border: '2px solid #ffffff',
             backgroundColor: 'transparent',
             color: '#ffffff',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}
         >
-          Dismiss Alert
+          <span>✕</span>
+          <span>Dismiss Alert</span>
         </button>
       </div>
     </section>

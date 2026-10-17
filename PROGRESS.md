@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current stage: 6 (Stage 6 — Feature Implementation: current task = Task 4: Accessibility Hardening)
+Current stage: 6 (Stage 6 — Feature Implementation: current task = Task 5: Live Mode & Security Hardening)
 Completed:
 - Stage 0: Idea Brief (`BRIEF.md` created, gate verified)
 - Stage 1: Requirements and Scope (`SPEC.md` created & amended, gate verified)
@@ -10,6 +10,7 @@ Completed:
 - Stage 5: Walking Skeleton (Task 1: HMAC Webhook to Phase 1 Alert End-to-End completed and verified)
 - Stage 6 (Task 2): Bedrock AI Multimodal Phase 2 Enrichment completed with 5s timeout fallback, AbortController, prompt isolation, zero-disk in-memory processing, clean fallback rejection for >25 words, and prompt tightened to 20 words
 - Stage 6 (Task 3): Two-Way Quick Replies & Visitor Screen (`/visitor`) completed with strict server whitelist, SQLite audit logging (`node:sqlite`), `REPLY_ACK`, `>=48px` touch targets, stale reply reset, and `DEMO_NOTES.md` recording script
+- Stage 6 (Task 4): Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards completed with dynamic CSS contrast tests, axe-core audits, persistent alerts without auto-clear, $\le 2$ flashes/sec safe cycle, `prefers-reduced-motion` override, persistent user sensory toggle (`FlashToggle`), non-color-alone status badges, and mobile tactile vibration
 
 Decisions:
 - Project Name: SignalDoor (Deaf-friendly Doorbell)
@@ -37,6 +38,14 @@ Decisions:
   * Delivery Confirmation: Dispatches `{ type: 'REPLY_ACK', payload: { eventId, status: 'DELIVERED' } }` back to the resident
   * Exterior Screen (`/visitor`): Dedicated high-contrast visitor view with timestamp; automatically resets to *"Waiting for response..."* on new `ALERT_PHASE_1` doorbell events
   * Accessible Touch Targets: Buttons sized $\ge 48$px with visible focus indicators and `aria-live="polite"` on alert text
+- Accessibility & Flashing Safeguards (WCAG 2.1 AA & WCAG 2.3.1):
+  * Dynamic Real-CSS Contrast Testing: Relative luminance verified against `src/client/styles/index.css` via W3C formula; primary text achieves 18.3:1, surfaces 11.2:1, focus rings 7.8:1
+  * Flash Rate Safety: 0.8s pulse cycle = 1.25 flashes/second (strictly $\le 2$ flashes/second, well below 3.0 Hz seizure risk threshold)
+  * Reduced Motion & Strobe Toggles: Auto-disabled under `prefers-reduced-motion: reduce`; user preference persisted in `localStorage` via `FlashToggle` with safe first-time defaults
+  * Persistent Alert Guarantee: Deaf alerts never self-clear or auto-dismiss on a timer; dismissed strictly via explicit `✕ Dismiss Alert` button ($\ge 48$px target)
+  * Non-Color-Alone Status: All status badges include explicit text + unicode icons (`✓ Online`, `✕ Offline`, `✓ Delivered`)
+  * Keyboard Operability: Full keyboard flow with high-contrast `:focus-visible` outline rings (3px offset) and Enter/Space triggers
+  * Responsive Viewport: Validated at 320px width and 200% zoom with `lang="en"` and descriptive page titles
 - Demo Milestones: Rough demo video checkpoint script produced in `DEMO_NOTES.md` (<3 minutes side-by-side); README, feedback, and friction log updated in every task
 
 Open questions & Contingencies:

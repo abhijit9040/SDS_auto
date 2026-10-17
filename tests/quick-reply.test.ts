@@ -79,7 +79,10 @@ describe('Task 3: Two-Way Quick Replies & Visitor Screen (/visitor)', () => {
 
     // Attempt to send an invalid / untrusted reply string
     const invalidPromise = new Promise<{ status: string }>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('Timeout waiting for invalid reply ack')), 2000);
+      const timer = setTimeout(
+        () => reject(new Error('Timeout waiting for invalid reply ack')),
+        2000
+      );
       residentWs.on('message', (data) => {
         const msg = JSON.parse(data.toString());
         if (msg.type === 'ERROR' || msg.status === 'REJECTED') {
@@ -215,7 +218,10 @@ describe('Task 3: Two-Way Quick Replies & Visitor Screen (/visitor)', () => {
 
     // Now a new doorbell press occurs: broadcast Phase 1 alert
     const resetPromise = new Promise<WebSocketServerMessage>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('Timeout waiting for alert broadcast')), 2000);
+      const timer = setTimeout(
+        () => reject(new Error('Timeout waiting for alert broadcast')),
+        2000
+      );
       visitorWs.on('message', (data) => {
         const msg = JSON.parse(data.toString()) as WebSocketServerMessage;
         if (msg.type === 'ALERT_PHASE_1') {
@@ -262,9 +268,7 @@ describe('Task 3: Two-Way Quick Replies & Visitor Screen (/visitor)', () => {
   // ── 6. VisitorScreen component rendering ──────────────────────────────────
   it('renders VisitorScreen with "Waiting for response..." initially and reply upon arrival', () => {
     // Initial state: waiting
-    const initialHtml = renderToString(
-      React.createElement(VisitorScreen, { currentReply: null })
-    );
+    const initialHtml = renderToString(React.createElement(VisitorScreen, { currentReply: null }));
     expect(initialHtml).toContain('Waiting for response...');
 
     // Arrived state: displays reply with timestamp

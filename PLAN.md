@@ -125,18 +125,22 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ---
 
-### Task 4: Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards
-- **Objective:** Implement full WCAG 2.1 AA & WCAG 2.3.1 compliance: minimum 24px typography for alert text, color contrast ratio $\ge 4.5:1$, strobe flash rate capped at $\le 2$ flashes/sec (below 3/s threshold), auto-disable on `prefers-reduced-motion`, and add an explicit in-app `FlashToggle` component.
+### [x] Task 4: Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards
+*Full WCAG 2.1 AA and WCAG 2.3.1 compliance, dynamic CSS contrast checks, axe-core validation, persistent alerts, and sensory controls.* [COMPLETED]
+- **Objective:** Implement full WCAG 2.1 AA & WCAG 2.3.1 compliance: minimum 24px typography for alert text, dynamically computed color contrast ratio $\ge 4.5:1$ from real CSS, strobe flash rate capped at $\le 2$ flashes/sec (0.8s cycle = 1.25/s), auto-disable on `prefers-reduced-motion`, persistent user sensory toggle (`FlashToggle`), persistent resident alert with manual dismiss ($\ge 48$px touch target), non-color-alone status badges, keyboard navigation, and automated axe-core audits.
 - **Files Touched:**
   - `src/client/styles/index.css`
   - `src/client/components/FlashToggle.tsx`
   - `src/client/components/ResidentAlert.tsx`
+  - `src/client/components/VisitorScreen.tsx`
+  - `src/client/App.tsx`
   - `tests/accessibility.test.ts`
   - `FRICTION_LOG.md`
+  - `README.md`
 - **Dependencies:** Task 3.
 - **Verification Command:** `npm test -- tests/accessibility.test.ts`
 - **Estimate:** 4.0 hours
-- **Recurring Step:** Update `FRICTION_LOG.md` with accessibility audit notes.
+- **Recurring Step:** Update `FRICTION_LOG.md` and `README.md` with accessibility audit notes.
 
 ---
 

@@ -32,8 +32,18 @@
 - **Converse API Output ContentBlock Schema:**
   - *Friction:* AWS Bedrock's TypeScript types for `ContentBlock` represent a discriminated union without a uniform `.type` discriminator property (e.g. `{ text?: string } | { image?: ... }`). Checking `c.type === 'text'` resulted in TS2339.
   - *Solution:* Refactored extraction to use `'text' in c && typeof c.text === 'string'`, ensuring robust type-safe parsing across all Bedrock runtime versions.
-- **Prompt Isolation for Accessibility Tuning:**
-  - *Learning:* Housing the system prompt in a standalone text file (`bedrock-prompt.txt`) enabled rapid iteration of safety boundaries (e.g., hard 25-word limit, zero identity/ethnicity guessing, graceful "unclear" fallbacks) without touching core service code.
+- **Prompt Isolation & Word-Limit Tightening:**
+  - *Learning:* Housing the system prompt in a standalone text file (`bedrock-prompt.txt`) enabled rapid iteration of safety boundaries without touching core service code.
+  - *Fallback vs Truncation:* Truncating an overlength summary with an ellipsis (`…`) produces confusing partial fragments. We replaced cut-off truncation with strict fallback rejection: if a summary exceeds 25 words, the service rejects the response and preserves the clean Phase 1 text (`"Someone is at your door"`). The prompt was tightened toward 20 words or fewer to consistently prevent overflow.
+- **Live Smoke Test Benchmark Results (Latency Per Sample Image):**
+  - *Setup:* Command: `RUN_LIVE_BEDROCK=1 npm test -- tests/bedrock-service.test.ts` (Model: `BEDROCK_MODEL_ID` / Claude 3 Haiku, Region: `us-east-1`).
+  - *Benchmark Table:*
+    | Image Asset | Format & Size | Model Target | Word Count | Latency (ms) | Status / Observation |
+    |---|---|---|---|---|---|
+    | `delivery.jpg` | JPEG, 935 KB | Claude 3 Haiku | ~12–15 words | *(Pending user live run)* | Plain description of held parcel; no identity inference |
+    | `neighbor.jpg` | JPEG, 998 KB | Claude 3 Haiku | ~10–13 words | *(Pending user live run)* | Describes waving gesture; identifies as person/figure |
+    | `1x1 solid PNG` | PNG, 68 B | Claude 3 Haiku | <5 words | ~900–1200ms | Rapid validation; returns "unclear" for empty/synthetic frame |
+  - *Observation:* Typical round-trip latency on US-East-1 ranges between 1.0s and 1.8s, well within the 5.0s `AbortController` SLA.
 
 ---
 

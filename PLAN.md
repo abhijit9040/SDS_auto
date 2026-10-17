@@ -55,8 +55,8 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ## 3. Ordered Task Checklist
 
-### Task 1: Walking Skeleton — HMAC-Verified Webhook to Phase 1 Alert End-to-End
-*Serves as the Walking Skeleton (Stage 5) and the Day-2 Ring integration check.*
+### [x] Task 1: Walking Skeleton — HMAC-Verified Webhook to Phase 1 Alert End-to-End
+*Serves as the Walking Skeleton (Stage 5) and the Day-2 Ring integration check.* [COMPLETED]
 - **Objective:**
   1. Capture raw request body bytes in Express.
   2. Implement HMAC-SHA256 verification (`X-Signature: sha256=<hex>`, `crypto.timingSafeEqual`).
@@ -83,10 +83,12 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ---
 
-### Task 2: Multimodal Bedrock Phase 2 Enrichment with 5s Timeout Fallback
-- **Objective:** Connect `BedrockService` using `@aws-sdk/client-bedrock-runtime` Converse API. Send watermarked visitor snapshot + event metadata to produce a concise ($\le 25$ words) plain-language summary. Broadcast Phase 2 update. Enforce strict 5.0s timeout with seamless fallback to Phase 1 text.
+### [x] Task 2: Multimodal Bedrock Phase 2 Enrichment with 5s Timeout Fallback
+*Multimodal Bedrock Converse API with AbortController 5.0s SLA.* [COMPLETED]
+- **Objective:** Connect `BedrockService` using `@aws-sdk/client-bedrock-runtime` Converse API. Send watermarked visitor snapshot + event metadata to produce a concise ($\le 25$ words) plain-language summary. Broadcast Phase 2 update. Enforce strict 5.0s timeout with seamless fallback to Phase 1 text. If summary exceeds 25 words, fall back cleanly without cut-offs; prompt tightened toward 20 words.
 - **Files Touched:**
   - `src/server/services/bedrock.ts`
+  - `src/server/services/bedrock-prompt.txt`
   - `src/server/controllers/event-controller.ts`
   - `src/server/assets/sample-visitors/delivery.jpg`
   - `src/server/assets/sample-visitors/neighbor.jpg`

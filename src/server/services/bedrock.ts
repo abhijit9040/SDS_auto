@@ -87,14 +87,24 @@ export class BedrockService {
         return { success: false, error: 'Empty response from Bedrock', latencyMs };
       }
 
-      const enforced = enforceWordLimit(text, MAX_WORDS);
+      const words = wordCount(text);
+      if (words > MAX_WORDS) {
+        console.warn(
+          `[Bedrock] Summary exceeded ${MAX_WORDS} words (${words} words). Rejecting in favor of fallback text.`
+        );
+        return {
+          success: false,
+          error: `Summary exceeded ${MAX_WORDS}-word limit (${words} words); falling back to generic alert`,
+          latencyMs,
+        };
+      }
 
       // Log latency only — no image data
       console.log(
-        `[Bedrock] deviceId=${metadata.deviceId} eventType=${metadata.eventType} latencyMs=${latencyMs} words=${wordCount(enforced)}`
+        `[Bedrock] deviceId=${metadata.deviceId} eventType=${metadata.eventType} latencyMs=${latencyMs} words=${words}`
       );
 
-      return { success: true, summary: enforced, latencyMs };
+      return { success: true, summary: text, latencyMs };
     } catch (err: unknown) {
       const latencyMs = Date.now() - start;
       const isAbort =
@@ -120,11 +130,4 @@ export class BedrockService {
 // ─── Word-count utilities ────────────────────────────────────────────────────
 function wordCount(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
-}
-
-function enforceWordLimit(text: string, maxWords: number): string {
-  const words = text.split(/\s+/).filter(Boolean);
-  if (words.length <= maxWords) return text;
-  // Truncate to maxWords and close with ellipsis
-  return words.slice(0, maxWords).join(' ') + '…';
 }

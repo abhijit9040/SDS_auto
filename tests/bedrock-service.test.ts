@@ -90,14 +90,14 @@ describe('BedrockService (mocked — no live AWS calls)', () => {
     expect(prompt).not.toMatch(/\bwho is\b/);
     expect(prompt).not.toMatch(/\bidentify the person\b/);
     // Ensure safety guardrails keywords are present
-    expect(prompt).toContain('25 words');
+    expect(prompt).toContain('20 words');
     expect(prompt).toContain('unclear');
     // Must contain a negative prohibition on identity
     expect(prompt).toMatch(/do not.{0,60}identity|do not.{0,60}ethnicity/);
   });
 
-  // ── 3. Summary word-count enforcement (>25 words → truncation/error) ───────
-  it('truncates or rejects a Bedrock response exceeding 25 words', async () => {
+  // ── 3. Summary word-count enforcement (>25 words → reject in favor of fallback) ───
+  it('rejects a Bedrock response exceeding 25 words in favor of fallback text', async () => {
     const longResponse =
       'A tall person wearing a red jacket is standing at the front door holding a very large brown cardboard box and looking towards the camera with an uncertain expression on their face.';
     mockSend.mockResolvedValueOnce(makeSuccessResponse(longResponse));
@@ -108,13 +108,10 @@ describe('BedrockService (mocked — no live AWS calls)', () => {
       metadata: { deviceId: 'front-door', eventType: 'ring' },
     });
 
-    // Either truncated to <=25 words, or success=false with fallback
-    if (result.success) {
-      const wordCount = result.summary!.split(/\s+/).filter(Boolean).length;
-      expect(wordCount).toBeLessThanOrEqual(25);
-    } else {
-      expect(result.summary).toBeUndefined();
-    }
+    // Exceeding 25 words must be rejected rather than cut off with ellipsis
+    expect(result.success).toBe(false);
+    expect(result.summary).toBeUndefined();
+    expect(result.error).toMatch(/exceeded 25-word limit/i);
   });
 
   // ── 4. Error path: Bedrock API throws → graceful fallback ─────────────────

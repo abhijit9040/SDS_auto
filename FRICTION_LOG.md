@@ -41,7 +41,7 @@
     | Image Asset | Format & Size | Model Target | Word Count | Latency (ms) | Status / Observation |
     |---|---|---|---|---|---|
     | `delivery.jpg` | JPEG, 935 KB | Claude 3 Haiku | ~12–15 words | *(Pending user live run)* | Plain description of held parcel; no identity inference |
-    | `neighbor.jpg` | JPEG, 998 KB | Claude 3 Haiku | ~10–13 words | *(Pending user live run)* | Describes waving gesture; identifies as person/figure |
+    | `visitor.jpg` | JPEG, 998 KB | Claude 3 Haiku | ~10–13 words | *(Pending user live run)* | Describes waving gesture; identifies as person/figure |
     | `1x1 solid PNG` | PNG, 68 B | Claude 3 Haiku | <5 words | ~900–1200ms | Rapid validation; returns "unclear" for empty/synthetic frame |
   - *Observation:* Typical round-trip latency on US-East-1 ranges between 1.0s and 1.8s, well within the 5.0s `AbortController` SLA.
 
@@ -60,22 +60,10 @@
 - **WebSocket Handshake Determinism in Automated Tests:**
   - *Testing Learning:* In high-speed tests, calling `broadcast` immediately after `ws.on('open')` causes race conditions because the subscription message is in flight. Introducing a bidirectional `{ type: 'SUBSCRIBED' }` server confirmation eliminated intermittent test flakes.
 
-### Task 4: Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards
-- **WCAG 2.3.1 Flashing Safeguards & Photosensitive Seizure Prevention:**
-  - *SLA & Rate Cap:* Flashing alarms for deaf users risk triggering photosensitive seizures if frequency approaches 3 flashes per second. We capped `.strobe-alert` at $\le 2$ flashes/second (0.8s duration = 1.25 Hz), strictly below the 3.0 Hz threshold.
-  - *System & In-App Coordination:* System-level `prefers-reduced-motion: reduce` unconditionally strips all strobe animations via CSS (`animation: none !important;`), while JavaScript initializes user preferences to disabled if reduced motion is requested.
-  - *Persistent In-App Control:* Built `FlashToggle` switch with `localStorage` persistence (`signaldoor_flash_enabled`), explicit touch targets ($\ge 48$px), and ARIA switch attributes (`role="switch"`, `aria-checked`, `aria-label`).
-- **Typography & Distant Legibility:**
-  - *Design Choice:* Deaf individuals often view notification monitors from across a living room or kitchen. Body text is locked to $\ge 24$px (`var(--text-xl)`), and alert headers to $\ge 32$px (`var(--text-2xl)`).
-  - *Contrast Verification:* Relative luminance audits confirmed contrast ratios far exceeding WCAG AA ($\ge 4.5:1$): urgent alert banner `#450a0a` with white text yields $16.2:1$, primary background `#0a0e17` with white text yields $19.3:1$, and cyan call-to-action buttons yield $8.8:1$.
-- **Automated Accessibility Testing with axe-core:**
-  - *Friction:* Running `axe.run` in headless environments (JSDOM) lacks computed color layout engines, triggering false negatives or canvas errors on color contrast rules.
-  - *Solution:* Split audit into two rigorous layers: automated mathematical relative-luminance / contrast ratio assertions in TypeScript, plus `axe.run()` DOM node scanning to assert zero critical or serious ARIA/markup violations across `ResidentAlert`, `FlashToggle`, `QuickReplies`, and `VisitorScreen`.
-
 ### Task 4: Accessibility Hardening, WCAG 2.3.1 Safeguards & Dynamic CSS Auditing
 - **Dynamic CSS Contrast Computation in Vitest:**
   - *Friction:* Hard-coding contrast values in tests creates false positives when CSS stylesheets are refactored or themes change. Testing should derive contrast directly from live CSS variables.
-  - *Solution:* Parsed `src/client/styles/index.css` in Vitest, extracted hex/rgb values for all foreground/background token pairs (including `:focus-visible` rings and disabled buttons), and calculated relative luminance ($L = 0.2126 R + 0.7152 G + 0.0722 B$) via the official W3C formula. Verified all text/background pairs achieve $\ge 4.5:1$ (e.g. `--text-primary` on `--bg-primary` achieves $18.3:1$) and UI components achieve $\ge 3.0:1$.
+  - *Solution:* Parsed `src/client/styles/index.css` in Vitest, extracted hex/rgb values for all foreground/background token pairs (including `:focus-visible` rings and disabled buttons), and calculated relative luminance ($L = 0.2126 R + 0.7152 G + 0.0722 B$) via the official W3C formula. Verified all text/background pairs achieve $\ge 4.5:1$ (e.g. `--text-primary` on `--bg-primary` achieves $19.3:1$, urgent banner achieves $15.4:1$, and card surfaces achieve $11.5:1$) and UI components achieve $\ge 3.0:1$ (focus rings achieve $9.0:1$).
 - **Automated `axe-core` Testing in JSDOM:**
   - *Friction:* JSDOM does not calculate visual rendering coordinates or CSS cascades, so running `axe.run(container)` with default settings throws false negatives or incomplete results for layout-dependent rules like `color-contrast`.
   - *Solution:* Scoped axe-core execution in JSDOM to semantic, ARIA, and DOM validity checks (`{ rules: { 'color-contrast': { enabled: false } } }`), while color contrast compliance was strictly enforced by the dynamic CSS mathematical contrast test suite.
@@ -85,12 +73,14 @@
 - **Deaf Alert Persistence vs Auto-Dismiss Toasts:**
   - *Accessibility Requirement:* In hearing apps, notifications frequently disappear after 5 seconds because an audible chime notified the resident. For deaf or hard-of-hearing residents, looking away or blinking could result in missing an entire delivery.
   - *Solution:* Enforced strict persistence: `ResidentAlert` never self-clears or uses `setTimeout` auto-dismissals. It remains visible on screen until the resident manually clicks the clearly labeled, $\ge 48$px touch target `✕ Dismiss Alert` button.
+- **Adaptive Screen Reader Alerts (ARIA):**
+  - *Implementation:* The initial visitor alert applies `role="alert"` and `aria-live="assertive"` for instantaneous screen reader notification. Downstream Phase 2 AI summary updates apply `role="status"` and `aria-live="polite"` so the enrichment is announced naturally without jarring interruptions.
 - **Non-Color-Alone Status Communication (WCAG 1.4.1):**
   - *Learning:* Relying solely on green/red badges excludes colorblind users.
   - *Solution:* Augmented all status badges and buttons with dual representation: explicit textual status coupled with unicode iconography (e.g., `✓ Online — Doorbell Connected`, `✕ Offline — Reconnecting...`, `✕ Dismiss Alert`).
 - **Mobile Tactile Feedback (`navigator.vibrate`):**
-  - *Learning:* Mobile browsers restrict tactile vibration (`navigator.vibrate`) unless preceded by user interaction or explicit permission.
-  - *Solution:* Implemented a dedicated sensory toggle in `FlashToggle` for mobile tactile vibration (`[300, 150, 300, 150, 300]`), seamlessly respecting both browser permissions and user preference.
+  - *Learning:* Mobile browsers restrict tactile vibration (`navigator.vibrate`) unless preceded by user interaction or explicit permission; moreover, iOS Safari does not support the Vibration API.
+  - *Solution:* Implemented a dedicated sensory toggle in `FlashToggle` for mobile tactile vibration (`[300, 150, 300, 150, 300]`), safely checking `typeof navigator.vibrate === 'function'` to gracefully degrade on iOS and desktop browsers.
 
 ---
 

@@ -36,20 +36,19 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ## 2. Schedule & Time Budget Overview
 
-- **Target Deadline:** October 23, 2026 (7-day timeline).
+- **Target Deadline:** October 21, 2026 (compressed 5-day timeline for early hackathon submission).
 - **Format:** Solo build, focused MVP.
-- **Budget:** ~32 hours across 5 active development days + 1 buffer day.
-- **Milestones:** Task 6 begins no later than Day 5. Rough demo video checkpoint recorded at Task 3.
+- **Budget:** ~28 hours across 4 active development days + 1 submission day.
+- **Milestones:** Task 6 begins on Day 5 (Oct 21). Rough demo video checkpoint recorded at Task 3.
 
-| Phase | Days | Focus | Est. Hours |
+| Phase | Target Date | Focus | Est. Hours |
 |---|---|---|---|
-| **Phase 1: Core Walking Skeleton** | Day 1 | HMAC-verified signed webhook &rarr; Phase 1 alert on resident UI | 5.5h |
-| **Phase 2: Bedrock AI Enrichment** | Day 2 | Multimodal Bedrock Converse API & Timeout Fallback | 6.0h |
-| **Phase 3: Two-Way & Checkpoint** | Day 3 | Quick Replies, Visitor Screen (`/visitor`), & rough video checkpoint | 5.5h |
-| **Phase 4: Accessibility Hardening**| Day 3 | WCAG AA Contrast, 24px Text, Flashing Safety | 4.0h |
-| **Phase 5: Live Mode & Security (Stretch)** | Day 4 | Ring Snapshots API (JPEG/PNG with watermarking) & OAuth | 5.5h |
-| **Phase 6: Submission & Video** | Day 5 | Demo Video, Product Feedback, Friction Log, Devpost | 6.0h |
-| **Buffer & Final Polish** | Day 6 | End-to-end smoke test, buffer for unforeseen issues | Buffer |
+| **Phase 1: Core Walking Skeleton** | Day 1 (Oct 17) | HMAC-verified signed webhook &rarr; Phase 1 alert on resident UI | 5.5h [DONE] |
+| **Phase 2: Bedrock AI Enrichment** | Day 2 (Oct 18) | Multimodal Bedrock Converse API & Timeout Fallback | 6.0h [DONE] |
+| **Phase 3: Two-Way & Checkpoint** | Day 3 (Oct 19) | Quick Replies, Visitor Screen (`/visitor`), & rough video checkpoint | 5.5h [DONE] |
+| **Phase 4: Accessibility Hardening**| Day 3 (Oct 19) | WCAG AA Contrast, 24px Text, Flashing Safety | 4.0h [DONE] |
+| **Phase 5-lite: Ring Sandbox & Mocked Snapshots** | Day 4 (Oct 20) | `ring-sandbox` emulator verification + Mocked Snapshots client (no live/OAuth) | 3.5h |
+| **Phase 6: Submission & Video** | Day 5 (Oct 21) | Demo Video, Product Feedback, Friction Log, Devpost submission | 4.5h |
 
 ---
 
@@ -91,7 +90,7 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
   - `src/server/services/bedrock-prompt.txt`
   - `src/server/controllers/event-controller.ts`
   - `src/server/assets/sample-visitors/delivery.jpg`
-  - `src/server/assets/sample-visitors/neighbor.jpg`
+  - `src/server/assets/sample-visitors/visitor.jpg`
   - `src/client/components/ResidentAlert.tsx`
   - `tests/bedrock-service.test.ts`
   - `FRICTION_LOG.md`
@@ -144,28 +143,28 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ---
 
-### Task 5 (Stretch): Ring Live Mode — Image Snapshots API & OAuth
-*Note: Stretch task executed only after the core demo (Tasks 1-4) is fully operational.*
-- **Objective:** Implement live Ring adapter capabilities using the official Ring Image Snapshots API (JPEG/PNG, watermarked) instead of clip video extraction:
-  1. REST client calling Ring Image Snapshots API for live doorbell snapshots.
-  2. Emulator sample images include corresponding watermark to match live behavior.
-  3. OAuth account linking endpoints (`GET /ring/link`, `POST /oauth/token`).
-  4. Ensure tunnel security whitelists only webhook/oauth endpoints.
+### Task 5-lite: Ring Sandbox Compatibility & Mocked REST Client
+*Focused Ring integration without unapproved live OAuth dependencies.*
+- **Objective:**
+  1. **ring-sandbox Compatibility:** Test payload compatibility of the open-source `ring-sandbox` emulator against `POST /webhooks/ring`, validating HMAC signing, payload format, and event parsing.
+  2. **Ring Image Snapshots + Devices REST Client:** Implement `RingApiAdapter` / client for `api.amazonvision.com` (device discovery and image snapshot retrieval) accompanied by comprehensive mocked tests (`tests/ring-api-adapter.test.ts`). Clearly label and annotate all tests as mocked/synthetic (not live-tested against production Ring servers).
+  3. **No OAuth Gate:** Defer live OAuth flow (`/ring/link`, `/oauth/token`) unless official Ring production partner approval is explicitly confirmed. Focus purely on clean REST client contracts and emulator compatibility.
+  4. Ensure sample images are watermarked to simulate live Ring Image Snapshots API output.
 - **Files Touched:**
   - `src/server/adapters/ring-api-adapter.ts`
-  - `src/server/routes/ring-oauth.ts`
+  - `src/server/adapters/ring-adapter.interface.ts`
   - `tests/ring-api-adapter.test.ts`
   - `FRICTION_LOG.md`
-  - `PRODUCT_FEEDBACK.md`
-- **Dependencies:** Task 4.
+  - `README.md`
+- **Dependencies:** Tasks 1–4.
 - **Verification Command:** `npm test -- tests/ring-api-adapter.test.ts`
-- **Estimate:** 5.5 hours
-- **Recurring Step:** Update `FRICTION_LOG.md` and `PRODUCT_FEEDBACK.md` with Ring API feedback.
+- **Estimate:** 3.5 hours
+- **Recurring Step:** Update `FRICTION_LOG.md` with emulator findings.
 
 ---
 
 ### Task 6: Hackathon Deliverables, Demo Video & Submission
-- **Objective:** Prepare and finalize all required hackathon deliverables (starts no later than Day 5):
+- **Objective:** Prepare and finalize all required hackathon deliverables (starts on Day 5, Oct 21):
   1. Finalize `README.md` with honest disclosure of `RING_MODE=emulator` vs live, architecture diagram, and quickstart.
   2. Final demo video ($\le 3$ minutes) demonstrating end-to-end doorbell press &rarr; immediate alert &rarr; Bedrock AI summary &rarr; quick reply on `/visitor` screen.
   3. Finalize written `PRODUCT_FEEDBACK.md` for Ring and Amazon Bedrock teams.
@@ -177,14 +176,14 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
   - `PRODUCT_FEEDBACK.md`
   - `FRICTION_LOG.md`
   - `SUBMISSION.md`
-- **Dependencies:** Tasks 1-4 (and Task 5 if stretch achieved).
+- **Dependencies:** Tasks 1-4 (and Task 5-lite).
 - **Verification Command:** `npm run build && npm test && npm run lint`
-- **Estimate:** 6.0 hours
+- **Estimate:** 4.5 hours
 - **Recurring Step:** Complete final submission check.
 
 ---
 
 ## 4. Verification & Gate Check
 
-- **Gate Requirement:** Every task is finishable in one session (estimates range from 4.0h to 6.0h).
-- **Milestone Guarantee:** Working walking skeleton on Day 1 (Task 1), full AI context on Day 2 (Task 2), complete accessible two-way demo on Day 3 (Tasks 3-4), submission prep started by Day 5 (Task 6).
+- **Gate Requirement:** Every task is finishable in one session (estimates range from 3.5h to 6.0h).
+- **Milestone Guarantee:** Working walking skeleton on Day 1 (Task 1), full AI context on Day 2 (Task 2), complete accessible two-way demo on Day 3 (Tasks 3-4), Ring compatibility and mocked client on Day 4 (Task 5-lite), submission finalized on Day 5 (Task 6, Oct 21).

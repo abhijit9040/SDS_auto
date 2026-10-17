@@ -184,6 +184,47 @@ describe('Task 4: Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards', () 
       expect(updatedSection?.classList.contains('strobe-alert')).toBe(false);
     });
 
+    it('sets role="alert" and aria-live="assertive" for Phase 1 new visitor, and aria-live="polite" with role="status" for Phase 2 updates', async () => {
+      const root = createRoot(container);
+
+      // Phase 1: immediate visitor alert
+      root.render(
+        React.createElement(ResidentAlert, {
+          alert: {
+            ...mockAlert,
+            phase: 'PHASE_1_IMMEDIATE',
+          },
+          onDismiss: vi.fn(),
+          flashEnabled: false,
+        })
+      );
+      await new Promise((r) => setTimeout(r, 20));
+
+      const phase1Section = container.querySelector('section');
+      expect(phase1Section).toBeTruthy();
+      expect(phase1Section?.getAttribute('role')).toBe('alert');
+      expect(phase1Section?.getAttribute('aria-live')).toBe('assertive');
+
+      // Phase 2: enriched AI update
+      root.render(
+        React.createElement(ResidentAlert, {
+          alert: {
+            ...mockAlert,
+            phase: 'PHASE_2_ENRICHED',
+            body: 'Delivery driver carrying a medium cardboard box.',
+          },
+          onDismiss: vi.fn(),
+          flashEnabled: false,
+        })
+      );
+      await new Promise((r) => setTimeout(r, 20));
+
+      const phase2Section = container.querySelector('section');
+      expect(phase2Section).toBeTruthy();
+      expect(phase2Section?.getAttribute('role')).toBe('status');
+      expect(phase2Section?.getAttribute('aria-live')).toBe('polite');
+    });
+
     it('enforces minimum 24px typography for alert text and polite live region', async () => {
       const root = createRoot(container);
       root.render(

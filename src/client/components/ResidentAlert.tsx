@@ -17,10 +17,12 @@ export const ResidentAlert: React.FC<ResidentAlertProps> = ({
   onSendReply,
   deliveredReply = null,
 }) => {
+  const isPhase1 = alert.phase === 'PHASE_1_IMMEDIATE';
+
   return (
     <section
-      role="alert"
-      aria-live="assertive"
+      role={isPhase1 ? 'alert' : 'status'}
+      aria-live={isPhase1 ? 'assertive' : 'polite'}
       className={flashEnabled ? 'strobe-alert' : ''}
       style={{
         padding: '2rem',

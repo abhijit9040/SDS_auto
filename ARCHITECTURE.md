@@ -5,13 +5,13 @@
 SignalDoor is architected as a unified TypeScript full-stack system optimized for low-latency visual alerts, WCAG 2.1 AA accessibility, and multimodal Amazon Bedrock processing. 
 
 ### Technology Stack
-- **Runtime & Language:** Node.js (v20+) with TypeScript 5+.
+- **Runtime & Language:** Node.js (v22+, strictly requiring >=22 for built-in `node:sqlite` DatabaseSync) with TypeScript 5+.
 - **Backend Framework:** Express.js with native WebSockets (`ws`).
 - **AI Engine:** Amazon Bedrock Converse API via `@aws-sdk/client-bedrock-runtime` using the current small fast multimodal model available in region.
 - **Ring Ingestion:** Unified `RingAdapter` interface with two swappable implementations selected via `RING_MODE=live|emulator`:
   - `RingApiAdapter` (Live): `POST /webhooks/ring` with HMAC signature verification, OAuth account linking, and `api.amazonvision.com` REST client.
   - `SimulatorAdapter` (Emulator): Generates identical webhook payload structures (via `ring-sandbox` emulator or local event generator) through the same webhook path.
-- **Persistence:** Local SQLite (`better-sqlite3` with graceful fallback to `node:sqlite` or `sqlite3` on Windows) for logging visitor events, AI descriptions, and quick replies.
+- **Persistence:** Local SQLite (`node:sqlite` `DatabaseSync` built into Node.js 22+) for logging visitor events, AI descriptions, and quick replies.
 - **Frontend Framework:** React 18+ with Vite and Vanilla CSS design tokens (high contrast, large typography, zero heavy CSS framework bloat).
 - **Communication:** Bidirectional WebSocket channel connecting Resident (`/`) and Visitor (`/visitor`) views.
 - **Orchestration / Dev Boot:** Single root `npm run dev` running backend and client concurrently.

@@ -31,7 +31,7 @@ SignalDoor implements a unified `RingAdapter` interface supporting two modes:
 ## Quickstart
 
 ### Prerequisites
-- **Node.js:** v20+ (tested on Node v24)
+- **Node.js:** v22+ (strictly requires built-in `node:sqlite` DatabaseSync; tested on Node v22 and v24)
 - **npm:** v10+
 
 ### Setup & Local Boot
@@ -117,9 +117,10 @@ SignalDoor is engineered from the ground up for deaf and hard-of-hearing residen
 
 - **Dynamically Computed Color Contrast (&ge; 4.5:1 / &ge; 3.0:1):**
   - Text pairs and UI components are tested against the actual CSS color variables using the W3C relative luminance formula ($L = 0.2126 R + 0.7152 G + 0.0722 B$).
-  - Primary text on dark background achieves **18.3:1** (far exceeding the 4.5:1 requirement).
-  - Secondary text on card surfaces achieves **11.2:1**.
-  - Interactive focus rings (`#38bdf8`) achieve **7.8:1** (exceeding the 3.0:1 UI component threshold).
+  - Primary text (`#ffffff`) on dark background (`#0a0e17`) achieves **19.3:1** (far exceeding the 4.5:1 requirement).
+  - Urgent alert banner (`#450a0a`) with white/light text achieves **15.4:1**.
+  - Secondary text (`#cbd5e1`) on card surfaces (`#141c2e`) achieves **11.5:1**.
+  - Interactive focus rings (`#38bdf8`) achieve **9.0:1** (exceeding the 3.0:1 UI component threshold).
 - **Epileptic Seizure & Flashing Safeguards (WCAG 2.3.1):**
   - Alert strobe animations pulse at $0.8$s per cycle (1.25 flashes/second), strictly capped below the 2.0 flashes/second specification and comfortably below the 3.0 flashes/second danger threshold.
   - Automatically disabled via `@media (prefers-reduced-motion: reduce)` with `animation: none !important;`.
@@ -127,10 +128,16 @@ SignalDoor is engineered from the ground up for deaf and hard-of-hearing residen
 - **Persistent Resident Alerts (No Auto-Dismiss):**
   - Because deaf residents may look away and cannot hear doorbell chimes, alert cards **never auto-clear or time out**.
   - A clearly labeled, accessible dismiss button (`✕ Dismiss Alert`) with a &ge; 48px touch target is provided for manual dismissal.
+- **Adaptive ARIA Announcements:**
+  - Initial doorbell press triggers an immediate `role="alert"` and `aria-live="assertive"` for instantaneous screen reader notification.
+  - Phase 2 multimodal AI enrichments update politely with `role="status"` and `aria-live="polite"`.
 - **Keyboard Navigation & Visible Focus:**
   - Full keyboard operability with logical tab order.
   - High-contrast `:focus-visible` outline rings with 3px offset.
   - Quick reply buttons and switches are fully operable via `Enter` and `Space`.
+- **Tactile Mobile Alerts (`navigator.vibrate`):**
+  - Optional mobile tactile vibration pulse pattern (`[300, 150, 300, 150, 300]`) accessible via sensory settings toggle.
+  - *Browser Support Note:* `navigator.vibrate` is supported on Android/Chromium browsers; it is unsupported on iOS Safari and certain desktop environments. The feature is progressively enhanced with safe runtime checks and zero errors on unsupported platforms.
 - **Non-Color-Alone Status (WCAG 1.4.1):**
   - Doorbell connectivity, delivery states, and error badges use both explicit descriptive text and distinct icons (`✓ Online — Doorbell Connected`, `✕ Offline — Reconnecting...`, `✓ Delivered to Door`).
 - **Responsive Layout & Zoom Support:**
@@ -145,6 +152,7 @@ SignalDoor is engineered from the ground up for deaf and hard-of-hearing residen
 
 - **Public Tunnel Restrictions:** If using a tunnel (e.g., ngrok) to receive external webhooks, only expose `/webhooks/ring`, `/ring/link`, and `/oauth/token`. Keep `/api/simulator/trigger` and WebSockets bound locally.
 - **Ephemeral Image Storage:** Visitor snapshots and media frames are processed purely in memory and immediately discarded after the Amazon Bedrock call. No video or visitor imagery is saved to disk.
+- **Synthetic Licensed Media:** All sample visitor snapshot images (`delivery.jpg`, `visitor.jpg`) in `src/server/assets/sample-visitors/` are 100% synthetically generated AI assets depicting fictional individuals. They contain no real-person PII, biometrics, or copyrighted materials.
 - **Zero Credentials:** Secrets, tokens, and AWS keys are managed via environment variables and never logged or committed.
 
 ---

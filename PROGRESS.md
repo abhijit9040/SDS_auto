@@ -57,8 +57,10 @@ Decisions:
 - Demo Milestones: Rough demo video checkpoint script produced in `DEMO_NOTES.md` (<3 minutes side-by-side); README, feedback, and friction log updated in every task
 
 Open questions & Contingencies:
-- Day 2 Fallback Trigger: Fallback to Alexa+ MCP server (Streamable HTTP) if no simulated/live Ring webhook events work by end of Day 2
-- AWS Bedrock region/model access verification
+- Day 2 Fallback Trigger: [CLOSED] Ingestion and ring-sandbox emulator compatibility succeeded; no Alexa+ fallback required.
+- AWS Bedrock access: [CLOSED] Converse API integration tested with AbortController, prompt templates, and optional live smoke runner.
+- Open Source mini challenge: confirm whether main repo counts or an additional project/PR is required.
+
 
 
 

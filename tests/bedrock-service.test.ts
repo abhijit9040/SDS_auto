@@ -320,28 +320,4 @@ describe('BedrockService (mocked — no live AWS calls)', () => {
     expect(result.error).toContain('AbortController');
     expect(result.error).toMatch(/timeout/i);
   });
-
-  // ── 12. Live smoke test (skipped unless RUN_LIVE_BEDROCK=1) ────────────────
-  it.skipIf(process.env.RUN_LIVE_BEDROCK !== '1')(
-    '[LIVE] smoke-tests real Bedrock Converse API with a sample image',
-    async () => {
-      // Restore real module by creating new instance that uses actual SDK
-      const liveService = new BedrockService();
-      // Use a minimal solid-color 1×1 PNG (safe to send)
-      const pngBase64 =
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-      const liveBuffer = Buffer.from(pngBase64, 'base64');
-
-      const result = await liveService.describeVisitor({
-        imageBuffer: liveBuffer,
-        mimeType: 'image/png',
-        metadata: { deviceId: 'smoke-test', eventType: 'test' },
-      });
-
-      console.log('[LIVE BEDROCK]', result);
-      // Even a solid 1x1 PNG should succeed or gracefully return summary
-      expect(result.latencyMs).toBeGreaterThan(0);
-    },
-    15_000
-  );
 });

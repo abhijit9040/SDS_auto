@@ -1,6 +1,6 @@
 import express, { Request } from 'express';
 import http from 'http';
-import { config } from './config.js';
+import { config, validateConfig } from './config.js';
 import { WebSocketHub } from './services/ws-hub.js';
 import { SimulatorAdapter } from './adapters/ring-simulator-adapter.js';
 import { RingApiAdapter } from './adapters/ring-api-adapter.js';
@@ -8,6 +8,9 @@ import { RingAdapter } from './adapters/ring-adapter.interface.js';
 import { createRingWebhookRouter } from './routes/ring-webhook.js';
 import { handleRingEvent } from './controllers/event-controller.js';
 import { AlertPayload } from '../shared/types.js';
+
+// Enforce configuration integrity on startup
+validateConfig(config);
 
 const app = express();
 const server = http.createServer(app);

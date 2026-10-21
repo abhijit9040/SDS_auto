@@ -22,7 +22,8 @@
     "test:watch": "vitest",
     "sandbox:serve": "python -m ring_sandbox.cli serve --port 8787",
     "sandbox:play": "python -m ring_sandbox.cli play delivery",
-    "bedrock:smoke": "tsx scripts/bedrock-smoke.ts"
+    "bedrock:smoke": "tsx scripts/bedrock-smoke.ts",
+    "setup": "node scripts/setup-env.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.750.0",

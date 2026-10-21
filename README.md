@@ -113,9 +113,9 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 
 3. **Configure environment:**
    ```bash
-   cp .env.example .env
+   npm run setup
    ```
-   *(The default `.env` comes pre-configured for offline emulator mode with test HMAC secret `dev-ring-hmac-secret-key-32chars-min`)*
+   *(Initializes `.env` from `.env.example` and populates random 32-byte hex secrets for `RING_WEBHOOK_SECRET` and `INTERNAL_DEV_SECRET` without overwriting existing files)*
 
 4. **Start the development server:**
    ```bash

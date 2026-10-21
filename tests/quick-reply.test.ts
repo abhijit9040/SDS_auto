@@ -92,6 +92,7 @@ describe('Task 3: Two-Way Quick Replies & Visitor Screen (/visitor)', () => {
       });
     });
 
+    wsHub.registerEventId('evt-test-invalid');
     const untrustedMsg = {
       type: 'QUICK_REPLY',
       payload: {
@@ -117,6 +118,7 @@ describe('Task 3: Two-Way Quick Replies & Visitor Screen (/visitor)', () => {
   it('logs valid replies in SQLite tied to eventId and returns REPLY_ACK to resident', async () => {
     const residentWs = await connectClient('resident');
     const eventId = 'evt-log-test-' + Date.now();
+    wsHub.registerEventId(eventId);
     const replyText = 'Leave it at the door';
 
     const ackPromise = new Promise<WebSocketServerMessage>((resolve, reject) => {
@@ -164,6 +166,7 @@ describe('Task 3: Two-Way Quick Replies & Visitor Screen (/visitor)', () => {
     const visitorWs = await connectClient('visitor');
 
     const eventId = 'evt-visitor-test-' + Date.now();
+    wsHub.registerEventId(eventId);
     const replyText = 'Coming in 2 minutes';
 
     const startTime = Date.now();

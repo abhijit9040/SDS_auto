@@ -29,7 +29,7 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 | **Amazon Bedrock AI** | Amazon Nova Lite via the Bedrock Converse API; region and model are configurable | Mocked in automated test suite (11 unit tests); unmocked CLI check via `npm run bedrock:smoke` |
 | **Hardware Required** | Physical Ring Doorbell + Ring Partner Account | Zero physical hardware; 100% offline-runnable |
 | **Partner Access Barrier** | Requires formal corporate Ring Partner OAuth approval | None; completely self-contained for hackathon judges & developers |
-| **Primary Use Case** | Production deployment in partner smart home environments | Hackathon evaluation, accessibility testing, and CI/CD automation |
+| **Primary Use Case** | Production deployment in partner smart home environments | Hackathon evaluation, accessibility testing, and automated test suite |
 
 ### What Was Tested Live
 - **Amazon Bedrock:** Amazon Nova Lite (`amazon.nova-lite-v1:0`) in region `ap-southeast-2`: one run, 14 words, 3535 ms, measured Oct 18, 2026. Other latencies not yet measured.
@@ -190,7 +190,7 @@ SignalDoor was intentionally designed from day one to serve deaf, hard-of-hearin
   - Features an optional sensory vibration sequence (`[300, 150, 300, 150, 300]`) for mobile devices.
   - *Browser Support Note:* Supported on Android/Chromium mobile browsers; gracefully degrades with zero runtime errors on iOS Safari and desktop environments.
 - **Automated axe-core Audits:**
-  - CI test suite executes `axe-core` across `ResidentAlert`, `VisitorScreen`, `QuickReplies`, and `FlashToggle` with zero critical or serious violations.
+  - Automated test suite executes `axe-core` across `ResidentAlert`, `VisitorScreen`, `QuickReplies`, and `FlashToggle` with zero critical or serious violations.
 
 ---
 
@@ -205,9 +205,9 @@ AI-powered camera analysis requires strict privacy and ethical safety controls:
    - The model prompt is isolated in [`src/server/services/bedrock-prompt.txt`](src/server/services/bedrock-prompt.txt).
    - Rules strictly mandate:
      - Output must be **one plain-language sentence, $\le 20$ words**.
-     - Describe only observable physical objects (e.g. *"A courier in uniform holding a cardboard box"*).
+     - Describe only observable physical objects (e.g. *"A person in a blue shirt and mask holds a box at the door."* — live run, Oct 18).
      - **Never infer or guess identity, name, age, gender, ethnicity, emotional state, or criminal intent**.
-     - Say *"unclear"* rather than inventing speculative details.
+     - The prompt instructs the model to say *"unclear"* when the image is ambiguous; this behaviour has not yet been measured.
 3. **Hard Word-Limit Fallback Rejection:**
    - If Bedrock generates a response exceeding 25 words, SignalDoor rejects the response entirely rather than displaying a cut-off fragment, cleanly retaining the Phase 1 text (*"Someone is at your door"*).
 4. **5.0s SLA AbortController:**

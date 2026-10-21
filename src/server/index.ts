@@ -1,5 +1,6 @@
 import express, { Request } from 'express';
 import http from 'http';
+import crypto from 'crypto';
 import { config, validateConfig } from './config.js';
 import { WebSocketHub } from './services/ws-hub.js';
 import { SimulatorAdapter } from './adapters/ring-simulator-adapter.js';
@@ -95,12 +96,35 @@ app.use(
   })
 );
 
+function timingSafeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 // Protected local simulator trigger endpoint
 app.post('/api/simulator/trigger', async (req, res) => {
-  const authHeader = req.headers['x-internal-secret'] || req.headers.authorization;
-  const isLocal = req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1';
+  // Reject any request carrying forwarded headers (e.g. from public reverse proxies/tunnels)
+  const hasForwardedHeader = Object.keys(req.headers).some((h) =>
+    h.toLowerCase().startsWith('x-forwarded-')
+  );
+  if (hasForwardedHeader) {
+    res.status(403).json({
+      error: 'Forbidden: forwarded proxy headers are rejected on internal simulator endpoint',
+    });
+    return;
+  }
 
-  if (!isLocal && authHeader !== config.internalDevSecret) {
+  // Require X-Internal-Secret header always (no isLocal bypass) using constant-time comparison
+  const authHeader = req.headers['x-internal-secret'];
+  if (
+    typeof authHeader !== 'string' ||
+    !config.internalDevSecret ||
+    !timingSafeCompare(authHeader, config.internalDevSecret)
+  ) {
     res.status(403).json({ error: 'Forbidden: internal simulator endpoint is protected' });
     return;
   }

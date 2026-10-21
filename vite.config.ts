@@ -1,4 +1,5 @@
 /// <reference types="vitest" />
+import 'dotenv/config';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -19,6 +20,17 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        headers: {
+          'X-Internal-Secret': process.env.INTERNAL_DEV_SECRET || '',
+        },
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            const secret = process.env.INTERNAL_DEV_SECRET;
+            if (secret) {
+              proxyReq.setHeader('X-Internal-Secret', secret);
+            }
+          });
+        },
       },
       '/webhooks': {
         target: 'http://localhost:3000',

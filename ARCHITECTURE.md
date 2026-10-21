@@ -78,7 +78,7 @@ SignalDoor is architected as a unified TypeScript full-stack system optimized fo
 
 1. **`RingWebhookRoute` (`src/server/routes/ring-webhook.ts`) & `RingOAuthRoute` (`src/server/routes/ring-oauth.ts`)**
    - Receives incoming Ring webhooks on `POST /webhooks/ring`.
-   - Validates webhook authenticity using HMAC-SHA256 signatures (`x-ring-signature` or Amazon Vision header) against configured secret.
+   - Validates webhook authenticity using HMAC-SHA256 signatures (`X-Signature` header) against configured secret.
    - Handles OAuth token lifecycle (`GET /ring/link` for user authorization, `POST /oauth/token` for code exchange).
    - **Zero Secret Leakage:** Never logs access/refresh tokens. Tokens are kept in-memory or in git-ignored `.env.local`.
 2. **`RingAdapter` Interface & Implementations (`src/server/adapters/`)**

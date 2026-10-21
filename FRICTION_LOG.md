@@ -15,10 +15,10 @@
   - *Observed Friction:* Node's `crypto.timingSafeEqual(bufA, bufB)` crashes with `RangeError` if the two buffers have different byte lengths (e.g. if an attacker supplies an invalid hex length).
   - *Solution:* Added an explicit buffer length equality check prior to executing `crypto.timingSafeEqual`.
 - **Request Deduplication & Webhook SLA:**
-  - *Observed Friction:* Webhook senders retry if an HTTP response is delayed by downstream processing.
+  - *Design note (from docs, not live-tested):* Webhook senders retry if an HTTP response is delayed by downstream processing.
   - *Solution:* Returning an immediate HTTP 200 upon verifying signature and checking `meta.request_id` prevents webhook retries, while downstream WebSocket dispatch runs asynchronously via `setImmediate`.
 - **Ring Webhook Schema Nuances:**
-  - *Observed Friction:* Ring's envelope schema uses `meta.time` (epoch millis) and `meta.version` rather than generic `timestamp` properties, while event data attributes can vary by device model.
+  - *Design note (from docs, not live-tested):* Ring's envelope schema uses `meta.time` (epoch millis) and `meta.version` rather than generic `timestamp` properties, while event data attributes can vary by device model.
   - *Solution:* Designed payload interfaces with open index signatures to avoid fragile hard-coded assumptions.
 
 ### Task 5-lite: ring-sandbox Compatibility & REST Client Implementation
@@ -32,9 +32,9 @@
     - Signature Header: Both conform to `X-Signature: sha256=<hex>` over raw JSON request body bytes.
   - *Outcome:* Compatibility verified in 15 minutes without vendoring or code duplication.
 - **Ring Partner REST Client (`api.amazonvision.com`):**
-  - *Exponential Backoff for Rate Limiting (429):* Implemented exponential backoff starting at 1.0s (`1s * 2^attempt`) and parsing the `Retry-After` header. Essential to avoid cascading failures if a doorbell generates multiple rapid events.
-  - *Binary Media Streaming:* `POST /v1/devices/{deviceId}/media/image/download` returns raw binary JPEG/PNG streams with metadata in headers (`X-Media-Timestamp`, `Content-Type`) rather than base64 in a JSON body. Stream buffering into Node `Buffer` in memory provides zero-disk ephemeral processing.
-  - *Fail-Fast Boot Guard:* When `RING_MODE=live`, the server checks for `RING_API_TOKEN` at startup and exits with an explicit descriptive error message if missing, avoiding silent failures during live events.
+  - *Exponential Backoff for Rate Limiting (429):* *Design note (from docs, not live-tested):* Implemented exponential backoff starting at 1.0s (`1s * 2^attempt`) and parsing the `Retry-After` header. Essential to avoid cascading failures if a doorbell generates multiple rapid events.
+  - *Binary Media Streaming:* *Design note (from docs, not live-tested):* `POST /v1/devices/{deviceId}/media/image/download` returns raw binary JPEG/PNG streams with metadata in headers (`X-Media-Timestamp`, `Content-Type`) rather than base64 in a JSON body. Stream buffering into Node `Buffer` in memory provides zero-disk ephemeral processing.
+  - *Fail-Fast Boot Guard:* *Design note (from docs, not live-tested):* When `RING_MODE=live`, the server checks for `RING_API_TOKEN` at startup and exits with an explicit descriptive error message if missing, avoiding silent failures during live events.
 
 ---
 
@@ -53,15 +53,22 @@
 - **Prompt Isolation & Word-Limit Tightening:**
   - *Learning:* Housing the system prompt in a standalone text file (`bedrock-prompt.txt`) enabled rapid iteration of safety boundaries without touching core service code.
   - *Fallback vs Truncation:* Truncating an overlength summary with an ellipsis (`…`) produces confusing partial fragments. We replaced cut-off truncation with strict fallback rejection: if a summary exceeds 25 words, the service rejects the response and preserves the clean Phase 1 text (`"Someone is at your door"`). The prompt was tightened toward 20 words or fewer to consistently prevent overflow.
-- **Live Smoke Test Benchmark Results (Latency Per Sample Image):**
-  - *Setup:* Command: `RUN_LIVE_BEDROCK=1 npm test -- tests/bedrock-service.test.ts` (Model: `BEDROCK_MODEL_ID` / Claude 3 Haiku, Region: `us-east-1`).
+- **Module-Level `vi.mock` Mock Contamination in Smoke Tests:**
+  - *Observed Friction:* In `tests/bedrock-service.test.ts`, the entire `@aws-sdk/client-bedrock-runtime` module was mocked at file scope using `vi.mock(...)`. A test marked `[LIVE]` inside that file attempted to test real AWS Bedrock calls, but because Vitest module mocks apply globally across the test file, the call silently invoked the fake client instead of AWS.
+  - *Solution:* Removed the pseudo-live test from the mocked test file and established a dedicated unmocked CLI verification tool (`scripts/bedrock-smoke.ts`, executed via `npm run bedrock:smoke`).
+- **Live Bedrock Smoke Verification & Measured Latency:**
+  - *Measured Run:* Executed unmocked CLI check (`npm run bedrock:smoke`) with active AWS credentials.
+  - *Date:* October 18, 2026
+  - *Configuration:* Region: `ap-southeast-2`, Model: `amazon.nova-lite-v1:0` (Amazon Nova Lite), Image: `delivery.jpg`.
   - *Benchmark Table:*
-    | Image Asset | Format & Size | Model Target | Word Count | Latency (ms) | Status / Observation |
-    |---|---|---|---|---|---|
-    | `delivery.jpg` | JPEG, 935 KB | Claude 3 Haiku | ~12–15 words | *(Pending user live run)* | Plain description of held parcel; no identity inference |
-    | `visitor.jpg` | JPEG, 998 KB | Claude 3 Haiku | ~10–13 words | *(Pending user live run)* | Describes waving gesture; identifies as person/figure |
-    | `1x1 solid PNG` | PNG, 68 B | Claude 3 Haiku | <5 words | ~900–1200ms | Rapid validation; returns "unclear" for empty/synthetic frame |
-  - *Observation:* Typical round-trip latency on US-East-1 ranges between 1.0s and 1.8s, well within the 5.0s `AbortController` SLA.
+    | Metric | Measured Value | Observation |
+    |---|---|---|
+    | **Execution Status** | `success: true` | Real unmocked Bedrock Converse API response |
+    | **Measured Latency** | `3535 ms` (one measured run) | Within the 5000 ms SLA timeout |
+    | **Word Count** | `14 words` | Meets the $\le 20$ target and $\le 25$ limit |
+    | **Generated Summary** | *"A person in a blue shirt and mask holds a box at the door."* | Objective physical description; no demographic guessing |
+  - *Other Latencies:* Not yet measured. All other latency data across other models, regions, or images is not yet measured.
+
 
 ---
 

@@ -13,7 +13,7 @@
 ---
 
 ## 2. Elevator Pitch / Short Description (1-2 Sentences)
-SignalDoor transforms Ring doorbells into an accessible, visual communication hub for deaf and hard-of-hearing individuals, delivering instant seizure-safe visual alerts (<2.0s), Amazon Bedrock multimodal AI visitor summaries (<5.0s), and accessible two-way quick replies to a dedicated exterior visitor screen.
+SignalDoor transforms Ring doorbells into an accessible, visual communication hub for deaf and hard-of-hearing individuals, delivering instant seizure-safe visual alerts (<2.0s), multimodal AI visitor summaries (<5.0s) powered by Amazon Nova Lite via the Bedrock Converse API (region and model are configurable), and accessible two-way quick replies to a dedicated exterior visitor screen.
 
 ---
 
@@ -40,7 +40,7 @@ SignalDoor is a complete, accessible smart doorbell system connecting Ring doorb
    - **Persistent Alert Guarantee:** Hearing apps auto-dismiss notifications after 5 seconds because residents heard a chime. SignalDoor alerts never auto-clear on a timer—they remain visible until explicitly dismissed via an accessible $\ge 48$px touch target.
 
 2. **Amazon Bedrock Multimodal AI Visitor Context (<5.0s):**
-   - In the background, Amazon Bedrock analyzes the camera snapshot using Claude 3 Haiku via the Converse API.
+   - In the background, the server invokes Amazon Nova Lite via the Bedrock Converse API (region and model are configurable) with the visitor camera snapshot.
    - Within 5.0 seconds, the alert enriches with an objective plain-language summary (e.g., *"A delivery courier in uniform holding a parcel on the porch"*).
    - **Responsible AI Guardrails:** System prompts strictly forbid guessing identity, age, gender, ethnicity, or criminal intent. If an image is ambiguous, it returns *"unclear"*.
    - **Two-Phase Fallback Resilience:** If Bedrock times out or encounters high latency, an `AbortController` cleanly falls back to Phase 1 text (*"Someone is at your door"*) without UI delays or confusing error states.
@@ -71,7 +71,7 @@ We designed SignalDoor as an enterprise-grade TypeScript monorepo combining mode
   - Implements exponential backoff on HTTP 429 rate limits, honors `Retry-After` headers, and includes fail-fast configuration guards.
   - Verified compatibility with `ring-sandbox` v1.1 open-source emulator.
 - **Amazon Bedrock Converse API:**
-  - Connected using `@aws-sdk/client-bedrock-runtime` with Claude 3 Haiku.
+  - Connected using `@aws-sdk/client-bedrock-runtime` with Amazon Nova Lite via the Bedrock Converse API; region and model are configurable. Automated test suite runs against mocked responses; unmocked CLI verification is available via `npm run bedrock:smoke`.
   - **Zero-Disk In-Memory Privacy:** Image bytes are buffered strictly in Node memory and transmitted directly as `Uint8Array`. No visitor images are written to disk, cached, or logged.
   - Enforces a 5.0-second SLA timeout using `AbortController`.
 - **Real-Time WebSockets & Node.js 22 SQLite:**
@@ -82,6 +82,10 @@ We designed SignalDoor as an enterprise-grade TypeScript monorepo combining mode
   - Styling in pure Vanilla CSS design tokens ([`src/client/styles/index.css`](src/client/styles/index.css)).
   - Mathematically validated color contrast: 19.3:1 primary text, 15.4:1 alert banner, 9.0:1 focus rings.
   - Automated `axe-core` accessibility audits integrated into CI.
+
+### What Was Tested Live
+- **Amazon Bedrock:** Amazon Nova Lite (`amazon.nova-lite-v1:0`) in region `ap-southeast-2`: one run, 14 words, 3535 ms, measured Oct 18, 2026. Other latencies not yet measured.
+- **Ring Integration:** Emulator only, not live (simulated and `ring-sandbox` synthetic payloads).
 
 ---
 
@@ -137,8 +141,8 @@ SignalDoor directly addresses the Ring Track by extending Ring smart doorbells i
 - Adds a groundbreaking two-way exterior visitor screen (`/visitor`) that bridges the communication gap between visitors and deaf residents.
 
 ### 10.2 AWS Builder Track Nomination
-SignalDoor leverages Amazon Bedrock as the core multimodal cognitive engine:
-- Integrates the Amazon Bedrock Converse API (`@aws-sdk/client-bedrock-runtime`) with Anthropic Claude 3 Haiku.
+SignalDoor integrates Amazon Bedrock as the multimodal cognitive engine:
+- Integrates the Amazon Bedrock Converse API (`@aws-sdk/client-bedrock-runtime`) with Amazon Nova Lite (region and model are configurable). Service logic, timeout handling, prompt boundaries, and payload building are fully verified via mocked test suites.
 - Features isolated responsible-AI prompt engineering ([`bedrock-prompt.txt`](src/server/services/bedrock-prompt.txt)) with zero demographic inference, anti-hallucination guardrails, and plain-language limits ($\le 20$ words).
 - Enforces an `AbortController` 5.0-second SLA timeout with graceful Two-Phase fallback.
 - Operates with 100% ephemeral in-memory byte buffers for strict privacy compliance.

@@ -363,4 +363,4 @@ amzon/
 2. **Day 2 Fallback Trigger:**
    - If simulated or live Ring events cannot be received end-to-end through the webhook path by the end of Day 2, trigger fallback to an Alexa+ MCP server (Streamable HTTP) implementing the identical visual alert and Bedrock architecture.
 3. **Bedrock Region Model Quota:**
-   - Verify small fast multimodal model access is activated in the selected AWS region (`us-east-1` or `us-west-2`).
+   - Verify small fast multimodal model access is activated in the selected AWS region (e.g. `ap-southeast-2` with Amazon Nova Lite, configurable via `AWS_REGION` and `BEDROCK_MODEL_ID`).

@@ -11,7 +11,7 @@ Traditional smart doorbells rely almost exclusively on audio chimes or small sma
 
 **SignalDoor** transforms the Ring smart doorbell into an inclusive, accessible communication hub:
 1. **Immediate High-Contrast Visual Alert (<2.0s):** Full-screen, high-contrast (WCAG AA $\ge 4.5:1$, primary text achieves **19.3:1**), large-typography alert with seizure-safe flashing ($\le 2$ flashes/sec, respecting `prefers-reduced-motion` and user sensory toggles).
-2. **Bedrock Multimodal AI Visitor Context (<5.0s):** Amazon Bedrock (Converse API with Claude 3 Haiku) inspects the camera snapshot in memory and provides a single-sentence plain-language summary ($\le 20$ words) of who is at the door, without guessing identity, age, or intent.
+2. **Bedrock Multimodal AI Visitor Context (<5.0s):** Amazon Nova Lite via the Bedrock Converse API (region and model are configurable) inspects the camera snapshot in memory and provides a single-sentence plain-language summary ($\le 20$ words) of who is at the door, without guessing identity, age, or intent.
 3. **Instant Two-Way Quick Replies:** Residents can tap accessible, $\ge 48$px touch-target replies (*"Leave it at the door"*, *"Coming in 2 minutes"*, *"I can't hear, please text me"*) that render immediately on a dedicated exterior visitor screen ([`/visitor`](http://localhost:3000/visitor)) with full SQLite audit logging.
 
 ---
@@ -26,10 +26,14 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 | **HMAC-SHA256 Verification** | Real `X-Signature: sha256=<hex>` verified with `crypto.timingSafeEqual` | Identical real `X-Signature: sha256=<hex>` verification with configured secret |
 | **Snapshot Image Retrieval** | `POST /v1/devices/{id}/media/image/download` against `api.amazonvision.com` | Curated synthetic test images (`delivery.jpg`, `visitor.jpg`) |
 | **REST Client Implementation** | [`RingRestClient`](src/server/services/ring-rest-client.ts) (JSON:API device discovery, snapshot download, 429 backoff) | Fully mocked with 14 unit tests (`tests/ring-api-adapter.test.ts`) |
-| **Amazon Bedrock AI** | Live AWS Bedrock Converse API (`BEDROCK_MODEL_ID`, `AWS_REGION`) | Mocked in automated test suite; live smoke test runner supported via `RUN_LIVE_BEDROCK=1` |
+| **Amazon Bedrock AI** | Amazon Nova Lite via the Bedrock Converse API; region and model are configurable | Mocked in automated test suite (11 unit tests); unmocked CLI check via `npm run bedrock:smoke` |
 | **Hardware Required** | Physical Ring Doorbell + Ring Partner Account | Zero physical hardware; 100% offline-runnable |
 | **Partner Access Barrier** | Requires formal corporate Ring Partner OAuth approval | None; completely self-contained for hackathon judges & developers |
 | **Primary Use Case** | Production deployment in partner smart home environments | Hackathon evaluation, accessibility testing, and CI/CD automation |
+
+### What Was Tested Live
+- **Amazon Bedrock:** Amazon Nova Lite (`amazon.nova-lite-v1:0`) in region `ap-southeast-2`: one run, 14 words, 3535 ms, measured Oct 18, 2026. Other latencies not yet measured.
+- **Ring Integration:** Emulator only, not live (simulated and `ring-sandbox` synthetic payloads).
 
 ---
 
@@ -53,7 +57,7 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
                                        |                                                   |
                                        v                                                   v
                          [WebSocket Broadcast Hub]                                [BedrockService]
-                         - Dispatches ALERT_PHASE_1                               - Converse API (Claude 3 Haiku)
+                         - Dispatches ALERT_PHASE_1                               - Amazon Nova Lite via the Bedrock Converse API; region and model are configurable
                          - Resets visitor screen state                            - 5.0s AbortController SLA
                                        |                                          - Zero-disk in-memory buffer
                                        |                                          - Falls back to Phase 1 on timeout
@@ -133,6 +137,13 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
    ```
    *Watch the Resident UI immediately pulse visually, enrich with Bedrock AI context, and update the Visitor Screen upon clicking a Quick Reply!*
 
+### Bedrock Setup & Verification
+
+- **Region & Model:** Specify `AWS_REGION` and `BEDROCK_MODEL_ID` in your `.env` (e.g. `ap-southeast-2` and `amazon.nova-lite-v1:0`; region and model are configurable).
+- **On-Demand Access:** `BEDROCK_MODEL_ID` must be a model with on-demand access in that region (do not configure a cross-region inference profile if your AWS account blocks cross-region routing).
+- **Run Smoke Verification:** Run `npm run bedrock:smoke` (or `npm run bedrock:smoke -- path/to/image.jpg`) to test live Bedrock connectivity and outputs directly.
+- **Graceful Fallback:** Without AWS credentials, the application displays only the Phase 1 visual alert (*"Someone is at your door"*) by design.
+
 ---
 
 ## 5. Testing & Verification
@@ -149,9 +160,13 @@ npm run lint
 # Run code formatter check
 npm run format:check
 
-# Run optional live Amazon Bedrock smoke test (requires active AWS credentials)
-RUN_LIVE_BEDROCK=1 npm test -- tests/bedrock-service.test.ts
+# Run standalone unmocked Bedrock smoke check (requires active AWS credentials)
+npm run bedrock:smoke
+
+# Or test against a specific image:
+npm run bedrock:smoke -- path/to/image.jpg
 ```
+
 
 ---
 

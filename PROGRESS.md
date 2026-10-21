@@ -8,7 +8,7 @@ Completed:
 - Stage 3: Project Setup (Scaffolded per `ARCHITECTURE.md`, git initialized, `.gitignore`, `.env.example`, `LICENSE`, `README.md`, ESLint, Prettier, Vitest, and TypeScript passing)
 - Stage 4: Plan and Task Breakdown (`PLAN.md` created & amended with HMAC in Task 1, Snapshots API in Task 5, gate verified)
 - Stage 5: Walking Skeleton (Task 1: HMAC Webhook to Phase 1 Alert End-to-End completed and verified)
-- Stage 6 (Task 2): Bedrock AI Multimodal Phase 2 Enrichment completed with 5s timeout fallback, AbortController, prompt isolation, zero-disk in-memory processing, clean fallback rejection for >25 words, and prompt tightened to 20 words
+- Stage 6 (Task 2): Bedrock AI Multimodal Phase 2 Enrichment completed with 5s timeout fallback, AbortController, prompt isolation, zero-disk in-memory processing, clean fallback rejection for >25 words, and prompt tightened to 20 words (Amazon Nova Lite via the Bedrock Converse API; region and model are configurable)
 - Stage 6 (Task 3): Two-Way Quick Replies & Visitor Screen (`/visitor`) completed with strict server whitelist, SQLite audit logging (`node:sqlite`), `REPLY_ACK`, `>=48px` touch targets, stale reply reset, and `DEMO_NOTES.md` recording script
 - Stage 6 (Task 4): Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards completed with dynamic CSS contrast tests, axe-core audits, persistent alerts without auto-clear, $\le 2$ flashes/sec safe cycle, `prefers-reduced-motion` override, persistent user sensory toggle (`FlashToggle`), non-color-alone status badges, and mobile tactile vibration
 - Stage 6 (Task 5-lite): Ring Sandbox Compatibility & Mocked REST Client completed with official api.amazonvision.com endpoint contracts (devices & snapshots), exponential backoff for 429, distinct 401/403/404 handling, fail-fast boot validation, in-memory token safety, ring-sandbox payload compatibility, and 14 mocked tests
@@ -34,13 +34,13 @@ Decisions:
   * Schedule compressed to submit by October 21
 - Two-Phase Alerting: Immediate Phase 1 notification (<2.0s) with fallback text, Phase 2 enrichment (<5.0s) with Bedrock summary
 - Bedrock Multimodal Enrichment:
-  * Model & Region: Loaded from environment variables (`BEDROCK_MODEL_ID`, `AWS_REGION`), zero hard-coded models
+  * Model & Region: Loaded from environment variables (`BEDROCK_MODEL_ID`, `AWS_REGION`), zero hard-coded models (configurable examples: `amazon.nova-lite-v1:0` in `ap-southeast-2`)
   * Timeout & SLA: 5.0s hard timeout enforced via `AbortController` signal passed to `@aws-sdk/client-bedrock-runtime`
   * Memory Isolation: In-memory image byte buffers strictly; zero disk retention and zero image data in console/telemetry logs
   * Safety & Prompt Design: Isolated in `src/server/services/bedrock-prompt.txt`; tightened toward 20 words (max 25); explicitly prohibits identity, age, or ethnicity inference, with graceful "unclear" fallbacks
   * Word Limit Fallback: If summary exceeds 25 words, discard partial text and fall back to clean Phase 1 alert text rather than cut-off sentences with ellipsis
   * Failure & Timeout Resilience: UI stays on Phase 1 text without flashing errors or disappearing alerts
-  * Live Smoke Test: `RUN_LIVE_BEDROCK=1 npm test -- tests/bedrock-service.test.ts` (skipped in standard CI)
+  * Live Smoke Script: `npm run bedrock:smoke` (standalone unmocked CLI check; not run in CI)
 - Two-Way Quick Replies & Visitor Display:
   * Server-Side Whitelist Validation: Only `'Leave it at the door'`, `'Coming in 2 minutes'`, and `"I can't hear, please text me"` are accepted; untrusted client input is rejected with `ERROR: REJECTED`
   * SQLite Transaction Audit Logging: Integrated Node.js built-in `node:sqlite` (`DatabaseSync`), logging every reply with `event_id`, `reply_text`, and ISO `timestamp`
@@ -60,7 +60,7 @@ Decisions:
 
 Open questions & Contingencies:
 - Day 2 Fallback Trigger: [CLOSED] Ingestion and ring-sandbox emulator compatibility succeeded; no Alexa+ fallback required.
-- AWS Bedrock access: [CLOSED] Converse API integration tested with AbortController, prompt templates, and optional live smoke runner.
+- Live Bedrock verification: [VERIFIED] Unmocked Bedrock Converse API verified on `ap-southeast-2` with `amazon.nova-lite-v1:0` (Nova Lite, ap-southeast-2: one run, 14 words, 3535 ms, measured Oct 18, 2026; other latencies not yet measured).
 - Open Source mini challenge: confirm whether main repo counts or an additional project/PR is required.
 
 

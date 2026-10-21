@@ -212,8 +212,8 @@ AI-powered camera analysis requires strict privacy and ethical safety controls:
    - If Bedrock generates a response exceeding 25 words, SignalDoor rejects the response entirely rather than displaying a cut-off fragment, cleanly retaining the Phase 1 text (*"Someone is at your door"*).
 4. **5.0s SLA AbortController:**
    - Multimodal inference is wrapped in an `AbortController` signal with a 5.0-second timeout. If the AI model is slow or experiences high latency, the user is never left waiting in an indeterminate state.
-5. **Synthetic Licensed Assets:**
-   - Demo images (`delivery.jpg`, `visitor.jpg`) are 100% synthetically generated AI assets labeled `"SIMULATED – SAMPLE IMAGE"`. No real human PII or third-party trademarks are present.
+5. **Sample Image Assets:**
+   - Sample images (`delivery.jpg`, `visitor.jpg`) are used for offline simulator testing. See [Sample Images](#sample-images) below for provenance and licensing details (marked TODO for completion).
 
 ---
 
@@ -232,6 +232,17 @@ SignalDoor builds upon high-quality open-source software and tools:
 | **`axe-core`** | MPL-2.0 | Automated web accessibility testing engine (Deque Systems) |
 | **`vitest`** | MIT License | Vite-native unit and integration test framework |
 | **`typescript`** | Apache-2.0 | Static typing system (Microsoft Corporation) |
+
+### Sample Images
+<!-- TODO: User to fill in image provenance, creator, and license details below -->
+- **delivery.jpg:**
+  - Source: [TODO: Add source URL or repository]
+  - Creator: [TODO: Add creator / author name]
+  - License: [TODO: Add license type, e.g. CC-BY / Public Domain / Synthetic]
+- **visitor.jpg:**
+  - Source: [TODO: Add source URL or repository]
+  - Creator: [TODO: Add creator / author name]
+  - License: [TODO: Add license type, e.g. CC-BY / Public Domain / Synthetic]
 
 ---
 

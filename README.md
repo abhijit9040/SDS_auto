@@ -12,7 +12,7 @@ Traditional smart doorbells rely almost exclusively on audio chimes or small sma
 **SignalDoor** transforms the Ring smart doorbell into an inclusive, accessible communication hub:
 1. **Immediate High-Contrast Visual Alert (<2.0s):** Full-screen, high-contrast (WCAG AA $\ge 4.5:1$, primary text achieves **19.3:1**), large-typography alert with seizure-safe flashing ($\le 2$ flashes/sec, respecting `prefers-reduced-motion` and user sensory toggles).
 2. **Bedrock Multimodal AI Visitor Context (<5.0s):** Amazon Nova Lite via the Bedrock Converse API (region and model are configurable) inspects the camera snapshot in memory and provides a single-sentence plain-language summary ($\le 20$ words) of who is at the door, without guessing identity, age, or intent.
-3. **Instant Two-Way Quick Replies:** Residents can tap accessible, $\ge 48$px touch-target replies (*"Leave it at the door"*, *"Coming in 2 minutes"*, *"I can't hear, please text me"*) that render immediately on a dedicated exterior visitor screen ([`/visitor`](http://localhost:3000/visitor)) with full SQLite audit logging.
+3. **Instant Two-Way Quick Replies:** Residents can tap accessible, $\ge 48$px touch-target replies (*"Leave it at the door"*, *"Coming in 2 minutes"*, *"I can't hear, please text me"*) that render immediately on a dedicated exterior visitor screen ([`/visitor`](http://localhost:5173/visitor)) with full SQLite audit logging.
 
 ---
 
@@ -95,7 +95,7 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 ## 4. Quickstart (Fresh Clone)
 
 ### Prerequisites
-- **Node.js:** v22+ (tested on Node.js v22 and v24; required for native `node:sqlite`)
+- **Node.js:** v22+ (required for built-in native `node:sqlite`. Note: Node emits an `ExperimentalWarning: SQLite is an experimental feature...` on startup, which is expected and does not impact functionality)
 - **npm:** v10+
 
 ### Step-by-Step Setup
@@ -103,7 +103,7 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/abhijit9040/SDS_auto.git
-   cd amzon
+   cd SDS_auto
    ```
 
 2. **Install dependencies:**
@@ -115,26 +115,20 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
    ```bash
    cp .env.example .env
    ```
-   *(The default `.env` comes pre-configured for offline emulator mode with test HMAC secret `test_secret_key_123`)*
+   *(The default `.env` comes pre-configured for offline emulator mode with test HMAC secret `dev-ring-hmac-secret-key-32chars-min`)*
 
 4. **Start the development server:**
    ```bash
    npm run dev
    ```
    The application launches at:
-   - **Resident UI:** [http://localhost:3000/](http://localhost:3000/)
-   - **Visitor Screen:** [http://localhost:3000/visitor](http://localhost:3000/visitor)
-   - **Healthcheck:** [http://localhost:3000/api/health](http://localhost:3000/api/health)
+   - **Resident UI:** [http://localhost:5173/](http://localhost:5173/)
+   - **Visitor Screen:** [http://localhost:5173/visitor](http://localhost:5173/visitor)
+   - **Backend API & Healthcheck:** [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
 5. **Simulate a doorbell visitor event:**
-   Open a separate terminal window and trigger a signed simulated event:
-   ```bash
-   # Simulate a delivery courier with package
-   npm run simulate:delivery
+   Open [http://localhost:5173/](http://localhost:5173/) in your browser and click the **"Simulate Doorbell Press"** button in the Simulator Controls panel.
 
-   # Or simulate a friendly neighbor visitor
-   npm run simulate:visitor
-   ```
    *Watch the Resident UI immediately pulse visually, enrich with Bedrock AI context, and update the Visitor Screen upon clicking a Quick Reply!*
 
 ### Bedrock Setup & Verification

@@ -367,10 +367,11 @@ describe('Task 5-lite: Ring Partner REST Client & Ring Sandbox Compatibility', (
 
     it('successfully accepts and parses ring-sandbox v1.1 event with ISO timestamp and relationships [mocked, not live-tested against Ring servers]', async () => {
       // Exact payload structure constructed by ring_sandbox.webhooks.build_event()
+      const sandboxTime = new Date().toISOString();
       const sandboxPayload: RingWebhookPayload = {
         meta: {
           version: '1.1',
-          time: '2026-10-17T11:10:52.469284Z', // ISO string emitted by ring-sandbox
+          time: sandboxTime, // ISO string emitted by ring-sandbox
           request_id: 'd4fedfd3-b389-406d-a850-936dbce5202a',
           account_id: 'ava1.ring.account.SANDBOX',
         },
@@ -417,7 +418,7 @@ describe('Task 5-lite: Ring Partner REST Client & Ring Sandbox Compatibility', (
       expect(receivedPayloads).toHaveLength(1);
       const received = receivedPayloads[0];
       expect(received.meta.version).toBe('1.1');
-      expect(received.meta.time).toBe('2026-10-17T11:10:52.469284Z');
+      expect(received.meta.time).toBe(sandboxTime);
       expect(received.data.type).toBe('button_press');
       expect(received.data.attributes.source).toBe('doorbell-front-123');
       expect(received.data.attributes.timestamp).toBe(1792235452469);

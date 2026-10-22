@@ -60,6 +60,13 @@ export default defineConfig({
     include: ['../../tests/**/*.test.ts'],
     setupFiles: ['../../tests/vitest.setup.ts'],
     env: {
+      // B8: Hermetic test secrets — allow `npm test` to pass on a clean clone
+      // with no .env file. These are fixed test-only values; the real server
+      // startup guard (validateConfig) still enforces real secrets at runtime.
+      RING_WEBHOOK_SECRET:
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      INTERNAL_DEV_SECRET:
+        'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       // Allow WebSocket connections without Origin in most tests.
       // B7 tests that verify Origin-rejection temporarily unset this flag.
       ALLOW_NO_ORIGIN: '1',

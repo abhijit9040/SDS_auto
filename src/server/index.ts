@@ -105,19 +105,23 @@ function timingSafeCompare(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-// Protected local simulator trigger endpoint
-app.post('/api/simulator/trigger', async (req, res) => {
-  // Reject any request carrying forwarded headers (e.g. from public reverse proxies/tunnels)
+// B7: Reject any /api/* request that carries X-Forwarded-* headers (tunnel / public-proxy indicator).
+// Public endpoints (/webhooks/ring, /oauth/*, /ring/*) are intentionally excluded from this guard.
+app.use('/api', (req, res, next) => {
   const hasForwardedHeader = Object.keys(req.headers).some((h) =>
     h.toLowerCase().startsWith('x-forwarded-')
   );
   if (hasForwardedHeader) {
     res.status(403).json({
-      error: 'Forbidden: forwarded proxy headers are rejected on internal simulator endpoint',
+      error: 'Forbidden: forwarded proxy headers are not accepted on /api routes',
     });
     return;
   }
+  next();
+});
 
+// Protected local simulator trigger endpoint
+app.post('/api/simulator/trigger', async (req, res) => {
   // Require X-Internal-Secret header always (no isLocal bypass) using constant-time comparison
   const authHeader = req.headers['x-internal-secret'];
   if (

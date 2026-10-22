@@ -58,5 +58,11 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['../../tests/**/*.test.ts'],
+    setupFiles: ['../../tests/vitest.setup.ts'],
+    env: {
+      // Allow WebSocket connections without Origin in most tests.
+      // B7 tests that verify Origin-rejection temporarily unset this flag.
+      ALLOW_NO_ORIGIN: '1',
+    },
   },
 });

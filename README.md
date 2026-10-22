@@ -144,6 +144,11 @@ When exposing SignalDoor to the internet (for example, via ngrok or Cloudflare T
 - **Configure secrets via `npm run setup`:** Always run `npm run setup` to generate strong, unique random 32-byte hex secrets for `RING_WEBHOOK_SECRET` and `INTERNAL_DEV_SECRET`. Never use default or empty secrets.
 - **Forward only webhook and OAuth endpoints:** Configure your reverse proxy or tunnel to forward only `/webhooks/ring` (and `/oauth/*` or `/ring/*` if using live OAuth linking).
 - **Never expose internal APIs or WebSockets:** Never expose `/api` (including `/api/simulator/trigger`) or `/ws` to public ingress. These endpoints are designed strictly for local browser and trusted internal operations.
+- **Active Header-Check Defense-in-Depth:** Even if misconfigured at the reverse proxy, internal endpoints are actively protected by server-side header guards:
+  - All `/api/*` endpoints reject any request carrying `X-Forwarded-*` headers with `403 Forbidden`.
+  - WebSocket (`/ws`) upgrade requests reject any connection carrying `X-Forwarded-*` headers with `403 Forbidden`.
+  - WebSocket (`/ws`) upgrade requests strictly require an `Origin` header matching allowed local origins (unless `ALLOW_NO_ORIGIN=1` is explicitly set). Public webhook and OAuth endpoints remain accessible for tunnel forwarding.
+
 
 ---
 

@@ -59,8 +59,23 @@ export class WebSocketHub {
       path: '/ws',
       maxPayload: 4096,
       verifyClient: (info, cb) => {
+        // B7: Reject upgrade if any X-Forwarded-* header is present (tunnel/proxy indicator)
+        const hasForwardedHeader = Object.keys(info.req.headers).some((h) =>
+          h.toLowerCase().startsWith('x-forwarded-')
+        );
+        if (hasForwardedHeader) {
+          cb(false, 403, 'Forbidden: WebSocket upgrade rejected from tunnel or reverse proxy');
+          return;
+        }
+
+        // B7: Require Origin header unless ALLOW_NO_ORIGIN=1 is set (tests may set it)
         const origin = info.origin;
-        if (origin) {
+        if (!origin) {
+          if (process.env.ALLOW_NO_ORIGIN !== '1') {
+            cb(false, 403, 'Forbidden: Origin header is required for WebSocket upgrade');
+            return;
+          }
+        } else {
           const allowed = getAllowedOrigins();
           if (!allowed.has(origin)) {
             cb(false, 403, 'Forbidden Origin');

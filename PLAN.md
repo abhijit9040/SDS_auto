@@ -201,7 +201,10 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
   - **B4:** Removed JSON.stringify fallback from webhook router, requiring raw body buffer; added `WEBHOOK_MAX_AGE_SECONDS` (default 300) event age verification.
   - **B5:** Added "Running behind a tunnel" security section to `README.md`.
   - **B6:** Comprehensive security verification suite (`tests/security-b6.test.ts`) covering all security controls.
-- **Verification Command:** `npm run build && npm test && npm run lint && npm run format:check` (11 test files, 90 tests passing).
+  - **B7:** WebSocket & `/api/*` tunnel exposure header rejection (`X-Forwarded-*` guard) and mandatory Origin header check (`tests/security-b7.test.ts`).
+  - **B8:** Hermetic test environment in `vite.config.ts` and `vitest.setup.ts` passing with zero `.env` dependencies.
+  - **B9:** Synchronized verified test counts (12 test files, 100 tests passing) across documentation.
+- **Verification Command:** `npm run build && npm test && npm run lint && npm run format:check` (12 test files, 100 tests passing).
 
 ---
 

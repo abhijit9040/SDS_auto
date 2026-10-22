@@ -154,7 +154,9 @@ When exposing SignalDoor to the internet (for example, via ngrok or Cloudflare T
 
 ## 5. Testing & Verification
 
-SignalDoor features comprehensive automated test coverage across 6 test suites with 59 automated tests:
+SignalDoor features comprehensive automated test coverage across 12 test files with 100 automated tests. The test suite is completely hermetic and passes out-of-the-box on a fresh clone (`git clone && npm install && npm test`) with no `.env` file required. 
+
+Note that while the test suite is fully hermetic, the application itself requires running `npm run setup` once to generate local cryptographic secrets in `.env` before running `npm run dev`.
 
 ```bash
 # Run all automated tests (unit, integration, accessibility, and mocked Bedrock/Ring)

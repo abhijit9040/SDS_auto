@@ -106,7 +106,7 @@ We designed SignalDoor as a TypeScript monorepo combining modern web standards, 
 
 ## 7. Accomplishments That We're Proud Of
 
-- **59 Automated Tests Passing Across 6 Suites:** Comprehensive coverage spanning webhook HMAC ingestion, Bedrock Converse API timeouts, quick reply validation, SQLite persistence, Ring REST client error handling, and axe-core accessibility audits.
+- **100 Automated Tests Passing Across 12 Test Files:** Comprehensive hermetic coverage spanning webhook HMAC ingestion, Bedrock Converse API timeouts, quick reply validation, SQLite persistence, Ring REST client error handling, axe-core accessibility audits, and security controls (timing-safe comparisons, payload validation, raw request buffers, event freshness checks, and tunnel header protections).
 - **19.3:1 Dynamic Color Contrast:** Surpassing WCAG 2.1 AA standards (4.5:1) with a high-contrast dark theme designed specifically for deaf and low-vision users.
 - **WCAG 2.3.1 Seizure Safety:** Visual pulse cycle of 0.8s (1.25 flashes/sec), safely below the 2.0/s cap and far from the 3.0 Hz danger threshold, paired with OS `prefers-reduced-motion` auto-disabling.
 - **Zero-Disk In-Memory Privacy Pipeline:** Absolute privacy guarantee—visitor frames are never written to disk, stored in temporary files, or leaked into telemetry logs.
@@ -150,10 +150,10 @@ SignalDoor integrates Amazon Bedrock as the multimodal cognitive engine:
 ### 10.3 Open Source Mini-Challenge Nomination
 SignalDoor is completely open-source and engineered for community adoption:
 - Permissive **MIT License** ([LICENSE](LICENSE)).
-- Clean **Quickstart** for a fresh clone (`git clone`, `npm install`, `cp .env.example .env`, `npm run dev`).
+- Clean **Quickstart** for a fresh clone (`git clone`, `npm install`, `npm run setup`, `npm run dev`).
 - Honest live-vs-emulator comparison table clearly distinguishing production hardware from offline testing.
 - Comprehensive third-party license disclosures table in `README.md`.
-- 59 automated tests passing with zero external native compilation requirements.
+- 100 automated tests passing across 12 test files with zero external native compilation requirements (passes hermetically out-of-the-box on a fresh clone with no .env file).
 
 ### 10.4 Friction Log & Product Feedback Bonus
 - **`FRICTION_LOG.md`:** Detailed 4-section log documenting 12 specific observed friction points and production-grade engineering solutions across Ring webhooks, AWS Bedrock Converse API, SQLite, and WCAG accessibility.

@@ -83,9 +83,10 @@
 
 ### [2:35 – 2:55] Scene 6: Architecture & Honest Disclosure
 - **Visual:**
-  - Briefly display the architecture diagram and test runner terminal showing 59 passing tests.
+  - Briefly display the architecture diagram and test runner terminal showing 100 passing tests across 12 test files.
 - **Voiceover / Caption:**  
-  > *"SignalDoor implements a unified RingAdapter supporting both live Ring Cloud webhooks and offline developer emulators like ring-sandbox. We built full HMAC-SHA256 signature verification, a resilient REST client with exponential backoff, and 59 automated tests covering accessibility, dynamic CSS contrast, and WCAG compliance."*
+  > *"SignalDoor implements a unified RingAdapter supporting both live Ring Cloud webhooks and offline developer emulators like ring-sandbox. We built full HMAC-SHA256 signature verification, a resilient REST client with exponential backoff, and 100 automated tests covering accessibility, dynamic CSS contrast, security guards, and WCAG compliance."*
+
 
 ---
 

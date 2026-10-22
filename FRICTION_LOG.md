@@ -57,17 +57,24 @@
   - *Observed Friction:* In `tests/bedrock-service.test.ts`, the entire `@aws-sdk/client-bedrock-runtime` module was mocked at file scope using `vi.mock(...)`. A test marked `[LIVE]` inside that file attempted to test real AWS Bedrock calls, but because Vitest module mocks apply globally across the test file, the call silently invoked the fake client instead of AWS.
   - *Solution:* Removed the pseudo-live test from the mocked test file and established a dedicated unmocked CLI verification tool (`scripts/bedrock-smoke.ts`, executed via `npm run bedrock:smoke`).
 - **Live Bedrock Smoke Verification & Measured Latency:**
-  - *Measured Run:* Executed unmocked CLI check (`npm run bedrock:smoke`) with active AWS credentials.
-  - *Date:* October 18, 2026
-  - *Configuration:* Region: `ap-southeast-2`, Model: `amazon.nova-lite-v1:0` (Amazon Nova Lite), Image: `delivery.jpg`.
+  - *Measured Runs:* Executed unmocked CLI checks (`npm run bedrock:smoke`) with active AWS credentials across sample assets.
+  - *Configuration:* Region: `ap-southeast-2`, Model: `amazon.nova-lite-v1:0` (Amazon Nova Lite via Converse API).
   - *Benchmark Table:*
-    | Metric | Measured Value | Observation |
-    |---|---|---|
-    | **Execution Status** | `success: true` | Real unmocked Bedrock Converse API response |
-    | **Measured Latency** | `3535 ms` (one measured run) | Within the 5000 ms SLA timeout |
-    | **Word Count** | `14 words` | Meets the $\le 20$ target and $\le 25$ limit |
-    | **Generated Summary** | *"A person in a blue shirt and mask holds a box at the door."* | Objective physical description; no demographic guessing |
-  - *Other Latencies:* Not yet measured. All other latency data across other models, regions, or images is not yet measured.
+    | Run # | Date | Input Asset | Type & Size | Success | Latency | Words | Generated Summary | Rule Pass? |
+    |---|---|---|---|---|---|---|---|---|
+    | Run 0 | Oct 18, 2026 | *Previous sample photo* | Photo (~935 KB, removed) | Yes | 3535 ms | 14 | *"A person in a blue shirt and mask holds a box at the door."* | Pass |
+    | Run 1 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2328 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door"* | Pass |
+    | Run 2 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2186 ms | 15 | *"A person in a blue jacket and black hat holding a box at the door."* | Pass |
+    | Run 3 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2170 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+    | Run 4 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2253 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+    | Run 5 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2137 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+    | Run 6 | Oct 22, 2026 | `visitor.jpg` | Illustration (25.2 KB) | Yes | 2295 ms | 10 | *"A person in a green shirt waves at the camera."* | Pass |
+    | Run 7 | Oct 22, 2026 | `empty-porch.jpg` | Illustration (20.6 KB) | Yes | 2186 ms | 14 | *"A white house with a black door and a window on the left side."* | Pass |
+    | Run 8 | Oct 22, 2026 | `dark-porch.jpg` | Illustration (14.7 KB) | Yes | 2133 ms | 10 | *"A dark room with a lit doorbell and a window."* | Pass |
+  - *Delivery Illustration Statistics (Runs 1–5):* Min: 2137 ms, Median: 2186 ms, Max: 2328 ms. Exceeded 5000 ms SLA: 0 of 5. All 5 runs strictly adhered to the $\le 25$ words rule with zero demographic, identity, age, gender, or intent guessing.
+  - *Empty & Dark Porch Evaluation:* `empty-porch.jpg` (Run 7) correctly described the physical building exterior without inventing a person. `dark-porch.jpg` (Run 8) described only the dimly visible scene elements without hallucination.
+  - *Important Disclosure on Asset Sizes & Latency:* Earlier Run 0 (3535 ms) used a high-resolution photo (~935 KB), which has since been removed from the repository. Current Runs 1–8 use lightweight flat-style illustrations generated via code (`scripts/make-sample-images.py`, ~15–25 KB). These inputs are not realistic camera images or photos, latencies are not directly comparable across different image types/sizes, and real high-resolution camera snapshots in production may take longer.
+  - *Ring Integration & Other Latencies:* Ring integration was tested via emulator only, not live. All other latency data across physical hardware or unmeasured endpoints is not yet measured.
 
 
 ---

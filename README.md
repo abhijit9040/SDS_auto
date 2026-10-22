@@ -32,8 +32,25 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 | **Primary Use Case** | Production deployment in partner smart home environments | Hackathon evaluation, accessibility testing, and automated test suite |
 
 ### What Was Tested Live
-- **Amazon Bedrock:** Amazon Nova Lite (`amazon.nova-lite-v1:0`) in region `ap-southeast-2`: one run, 14 words, 3535 ms, measured Oct 18, 2026. Other latencies not yet measured.
-- **Ring Integration:** Emulator only, not live (simulated and `ring-sandbox` synthetic payloads).
+
+#### Amazon Bedrock Multimodal Inference (Live unmocked runs against `amazon.nova-lite-v1:0` in `ap-southeast-2`)
+
+| Run # | Date | Input Asset | Type & Size | Success | Latency | Words | Generated Summary | Rule Pass? |
+|---|---|---|---|---|---|---|---|---|
+| Run 0 | Oct 18, 2026 | *Previous sample photo* | Photo (~935 KB, removed) | Yes | 3535 ms | 14 | *"A person in a blue shirt and mask holds a box at the door."* | Pass |
+| Run 1 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2328 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door"* | Pass |
+| Run 2 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2186 ms | 15 | *"A person in a blue jacket and black hat holding a box at the door."* | Pass |
+| Run 3 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2170 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+| Run 4 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2253 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+| Run 5 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2137 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+| Run 6 | Oct 22, 2026 | `visitor.jpg` | Illustration (25.2 KB) | Yes | 2295 ms | 10 | *"A person in a green shirt waves at the camera."* | Pass |
+| Run 7 | Oct 22, 2026 | `empty-porch.jpg` | Illustration (20.6 KB) | Yes | 2186 ms | 14 | *"A white house with a black door and a window on the left side."* | Pass |
+| Run 8 | Oct 22, 2026 | `dark-porch.jpg` | Illustration (14.7 KB) | Yes | 2133 ms | 10 | *"A dark room with a lit doorbell and a window."* | Pass |
+
+- **Delivery Illustration Statistics (Runs 1–5):** Min: 2137 ms, Median: 2186 ms, Max: 2328 ms. Exceeded 5000 ms SLA: 0 of 5. All 5 runs strictly obeyed the $\le 25$ words rule with zero demographic, identity, age, gender, or intent guessing.
+- **Empty & Dark Porch Evaluation:** `empty-porch.jpg` (Run 7) correctly described the physical building exterior without inventing a person. `dark-porch.jpg` (Run 8) described only the dimly visible scene elements without hallucination.
+- **Important Disclosure on Asset Sizes & Latency:** Earlier Run 0 (3535 ms) used a high-resolution photo (~935 KB), which has since been removed from the repository. Current Runs 1–8 use lightweight flat-style illustrations generated via code (`scripts/make-sample-images.py`, ~15–25 KB). These inputs are not realistic camera images or photos, latencies are not directly comparable across different image types/sizes, and real high-resolution camera snapshots in production may take longer.
+- **Ring Integration:** Tested with emulator only, not live (simulated and `ring-sandbox` synthetic payloads). All other hardware latencies are not yet measured.
 
 ---
 

@@ -187,9 +187,25 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 - **Estimate:** 4.5 hours
 - **Recurring Step:** Complete final submission check.
 
+### [x] Task 7: Security Hardening & Documentation Honesty (Parts A & B)
+*Comprehensive documentation honesty audit and multi-layer security hardening.* [COMPLETED]
+- **Part A (Documentation Honesty):**
+  - Standardized all Bedrock disclosures to Amazon Nova Lite (`ap-southeast-2`), verified via live unmocked run on Oct 18, 2026 (`3535 ms`, 14 words).
+  - Relabeled docs-based friction entries as design notes. Corrected header to `X-Signature`.
+  - Updated quickstart with `SDS_auto` clone directory, port separation (`:5173` UI, `:3000` API), and Node 22+ guidance.
+  - Set LICENSE copyright to Abhijit and added Sample Images attribution section.
+- **Part B (Security Hardening):**
+  - **B1:** Removed hard-coded secrets; added `npm run setup` (`scripts/setup-env.mjs`) generating random 32-byte hex secrets without overwriting; startup guard refusing to run with missing or `CHANGE_ME` secrets.
+  - **B2:** Protected `POST /api/simulator/trigger` with constant-time `X-Internal-Secret` verification (`crypto.timingSafeEqual`); rejected all `X-Forwarded-*` proxy headers; injected secret via Vite dev proxy.
+  - **B3:** Enforced WebSocket origin allowlist via `verifyClient`; set `maxPayload: 4096`; closed with code 1008 on non-JSON; resident-only role verification; in-memory bounded `eventId` verification; authoritative server timestamps.
+  - **B4:** Removed JSON.stringify fallback from webhook router, requiring raw body buffer; added `WEBHOOK_MAX_AGE_SECONDS` (default 300) event age verification.
+  - **B5:** Added "Running behind a tunnel" security section to `README.md`.
+  - **B6:** Comprehensive security verification suite (`tests/security-b6.test.ts`) covering all security controls.
+- **Verification Command:** `npm run build && npm test && npm run lint && npm run format:check` (11 test files, 90 tests passing).
+
 ---
 
 ## 4. Verification & Gate Check
 
 - **Gate Requirement:** Every task is finishable in one session (estimates range from 3.5h to 6.0h).
-- **Milestone Guarantee:** Working walking skeleton on Day 1 (Task 1), full AI context on Day 2 (Task 2), complete accessible two-way demo on Day 3 (Tasks 3-4), Ring compatibility and mocked client on Day 4 (Task 5-lite), submission finalized on Day 5 (Task 6, Oct 21).
+- **Milestone Guarantee:** Working walking skeleton on Day 1 (Task 1), full AI context on Day 2 (Task 2), complete accessible two-way demo on Day 3 (Tasks 3-4), Ring compatibility and mocked client on Day 4 (Task 5-lite), submission finalized on Day 5 (Task 6, Oct 21), security hardening and documentation honesty finalized (Task 7).

@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current stage: 6 (Stage 6 — Feature Implementation: all Tasks 1–6 completed; ready for Stage 7 — Harden)
+Current stage: 7 (Stage 7 — Security Hardening & Documentation Honesty completed; all Parts A & B implemented and verified)
 Completed:
 - Stage 0: Idea Brief (`BRIEF.md` created, gate verified)
 - Stage 1: Requirements and Scope (`SPEC.md` created & amended, gate verified)
@@ -13,6 +13,8 @@ Completed:
 - Stage 6 (Task 4): Accessibility Hardening & WCAG 2.3.1 Flashing Safeguards completed with dynamic CSS contrast tests, axe-core audits, persistent alerts without auto-clear, $\le 2$ flashes/sec safe cycle, `prefers-reduced-motion` override, persistent user sensory toggle (`FlashToggle`), non-color-alone status badges, and mobile tactile vibration
 - Stage 6 (Task 5-lite): Ring Sandbox Compatibility & Mocked REST Client completed with official api.amazonvision.com endpoint contracts (devices & snapshots), exponential backoff for 429, distinct 401/403/404 handling, fail-fast boot validation, in-memory token safety, ring-sandbox payload compatibility, and 14 mocked tests
 - Stage 6 (Task 6): Hackathon Deliverables, Demo Video & Submission completed with finalized `README.md` (live vs emulator table, quickstart, architecture, accessibility, responsible-AI, licenses), `DEMO_SCRIPT.md` (3-minute split-screen walkthrough), finalized `PRODUCT_FEEDBACK.md` (requests for Ring and Bedrock), finalized `FRICTION_LOG.md` (observed friction only), and full `SUBMISSION.md` (Devpost fields drafted)
+- Stage 7 (Part A: Documentation Honesty): Completed Tasks A1–A6 (commits `b496083`, `aeb1549`, `6b0f514`, `7fbbcb4`, `32568b0`, `1472ff5`). Eliminated unmeasured benchmarks, standardized Nova Lite disclosures, clarified Ring emulator payload support, fixed quickstart instructions, and updated license attribution.
+- Stage 7 (Part B: Security Hardening): Completed Tasks B1–B6. Removed hardcoded default secrets, added `npm run setup` generator, enforced startup validation, secured simulator trigger with constant-time `X-Internal-Secret` and rejected forwarded proxy headers, secured WebSockets (origin allowlisting, 4 KB maxPayload, immediate 1008 closure on non-JSON, resident-only replies, server-side eventId verification, authoritative server timestamps), enforced raw request body buffer on webhooks with event freshness verification (`WEBHOOK_MAX_AGE_SECONDS`), added tunnel ingress documentation, and established 11 test suites with 90 automated tests passing.
 
 
 Decisions:

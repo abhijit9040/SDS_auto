@@ -91,6 +91,8 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
   - `src/server/controllers/event-controller.ts`
   - `src/server/assets/sample-visitors/delivery.jpg`
   - `src/server/assets/sample-visitors/visitor.jpg`
+  - `src/server/assets/sample-visitors/empty-porch.jpg`
+  - `src/server/assets/sample-visitors/dark-porch.jpg`
   - `src/client/components/ResidentAlert.tsx`
   - `tests/bedrock-service.test.ts`
   - `FRICTION_LOG.md`

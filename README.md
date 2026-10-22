@@ -138,6 +138,13 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 - **Run Smoke Verification:** Run `npm run bedrock:smoke` (or `npm run bedrock:smoke -- path/to/image.jpg`) to test live Bedrock connectivity and outputs directly.
 - **Graceful Fallback:** Without AWS credentials, the application displays only the Phase 1 visual alert (*"Someone is at your door"*) by design.
 
+### Running Behind a Tunnel
+
+When exposing SignalDoor to the internet (for example, via ngrok or Cloudflare Tunnels to receive external webhooks):
+- **Configure secrets via `npm run setup`:** Always run `npm run setup` to generate strong, unique random 32-byte hex secrets for `RING_WEBHOOK_SECRET` and `INTERNAL_DEV_SECRET`. Never use default or empty secrets.
+- **Forward only webhook and OAuth endpoints:** Configure your reverse proxy or tunnel to forward only `/webhooks/ring` (and `/oauth/*` or `/ring/*` if using live OAuth linking).
+- **Never expose internal APIs or WebSockets:** Never expose `/api` (including `/api/simulator/trigger`) or `/ws` to public ingress. These endpoints are designed strictly for local browser and trusted internal operations.
+
 ---
 
 ## 5. Testing & Verification

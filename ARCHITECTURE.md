@@ -9,8 +9,8 @@ SignalDoor is architected as a unified TypeScript full-stack system optimized fo
 - **Backend Framework:** Express.js with native WebSockets (`ws`).
 - **AI Engine:** Amazon Bedrock Converse API via `@aws-sdk/client-bedrock-runtime` using the current small fast multimodal model available in region.
 - **Ring Ingestion:** Unified `RingAdapter` interface with two swappable implementations selected via `RING_MODE=live|emulator`:
-  - `RingApiAdapter` (Live): `POST /webhooks/ring` with HMAC signature verification, OAuth account linking, and `api.amazonvision.com` REST client.
-  - `SimulatorAdapter` (Emulator): Generates identical webhook payload structures (via `ring-sandbox` emulator or local event generator) through the same webhook path.
+  - `RingApiAdapter` (Live): `POST /webhooks/ring` with HMAC signature verification, OAuth account linking (planned, not implemented), and `api.amazonvision.com` REST client.
+  - `SimulatorAdapter` (Emulator): Generates identical webhook payload structures (built-in simulator (optional external ring-sandbox emulator not run)) through the same webhook path.
 - **Persistence:** Local SQLite (`node:sqlite` `DatabaseSync` built into Node.js 22+) for logging visitor events, AI descriptions, and quick replies.
 - **Frontend Framework:** React 18+ with Vite and Vanilla CSS design tokens (high contrast, large typography, zero heavy CSS framework bloat).
 - **Communication:** Bidirectional WebSocket channel connecting Resident (`/`) and Visitor (`/visitor`) views.
@@ -30,7 +30,7 @@ SignalDoor is architected as a unified TypeScript full-stack system optimized fo
 |              v                                                                                  |
 |   +-----------------------------------------------------------------------------------------+   |
 |   | Public Tunnel Ingress (ngrok/localtunnel) - STRICTLY RESTRICTED                         |   |
-|   | ONLY exposes: /webhooks/ring, /ring/link, /oauth/token                                   |   |
+|   | ONLY exposes: /webhooks/ring (OAuth /ring/link, /oauth/token planned, not implemented)   |   |
 |   +--------------------------------------------+--------------------------------------------+   |
 |                                                |                                                |
 |                                                v                                                |
@@ -76,10 +76,10 @@ SignalDoor is architected as a unified TypeScript full-stack system optimized fo
 
 ### Component Responsibilities
 
-1. **`RingWebhookRoute` (`src/server/routes/ring-webhook.ts`) & `RingOAuthRoute` (`src/server/routes/ring-oauth.ts`)**
+1. **`RingWebhookRoute` (`src/server/routes/ring-webhook.ts`) & `RingOAuthRoute` (`src/server/routes/ring-oauth.ts` — planned, not implemented)**
    - Receives incoming Ring webhooks on `POST /webhooks/ring`.
    - Validates webhook authenticity using HMAC-SHA256 signatures (`X-Signature` header) against configured secret.
-   - Handles OAuth token lifecycle (`GET /ring/link` for user authorization, `POST /oauth/token` for code exchange).
+   - OAuth token lifecycle (`GET /ring/link` for user authorization, `POST /oauth/token` for code exchange) is planned, not implemented.
    - **Zero Secret Leakage:** Never logs access/refresh tokens. Tokens are kept in-memory or in git-ignored `.env.local`.
 2. **`RingAdapter` Interface & Implementations (`src/server/adapters/`)**
    - **`RingAdapter` Interface:** Contract requiring `initialize()`, `onVisitorEvent(cb)`, and `getMediaFrame(mediaId)`.
@@ -184,11 +184,10 @@ sequenceDiagram
 ## 4. Security, Ingress & Windows Portability
 
 ### 4.1 Ingress Isolation & Tunnel Rules
-When using a public tunnel (e.g. ngrok or localtunnel) to receive live Ring cloud webhooks or OAuth redirects:
+When using a public tunnel (e.g. ngrok or localtunnel) to receive live Ring cloud webhooks:
 - **Allowed Public Ingress Paths (Whitelisted):**
   - `POST /webhooks/ring` (HMAC verification required)
-  - `GET /ring/link` (OAuth account linking page)
-  - `POST /oauth/token` (OAuth code exchange)
+  - *(OAuth routes `GET /ring/link` and `POST /oauth/token` are planned, not implemented)*
 - **Local-Only Protected Bindings:**
   - `POST /api/simulator/trigger` is bound to `127.0.0.1` only or protected by `INTERNAL_DEV_SECRET` header.
   - WebSocket `/ws` is protected against unauthorized external connections.
@@ -319,7 +318,7 @@ amzon/
 │   │   │   └── event-controller.ts          # Coordinates Phase 1 broadcast, Bedrock call, Phase 2 broadcast
 │   │   ├── routes/
 │   │   │   ├── ring-webhook.ts              # POST /webhooks/ring (HMAC signature verification)
-│   │   │   ├── ring-oauth.ts                # GET /ring/link, POST /oauth/token
+│   │   │   ├── ring-oauth.ts                # GET /ring/link, POST /oauth/token (planned, not implemented)
 │   │   │   └── api.ts                       # Local protected endpoints (/api/simulator/trigger, /api/health)
 │   │   ├── adapters/
 │   │   │   ├── ring-adapter.interface.ts    # RingAdapter common interface

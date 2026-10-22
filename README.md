@@ -22,7 +22,7 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 
 | Capability / Dimension | Live Partner API (`RING_MODE=live`) | Emulator Mode (`RING_MODE=emulator` — Default) |
 |---|---|---|
-| **Doorbell Event Ingestion** | Live Ring Webhook pushed to `POST /webhooks/ring` | Local simulator or `ring-sandbox` CLI pushing to `POST /webhooks/ring` |
+| **Doorbell Event Ingestion** | Live Ring Webhook pushed to `POST /webhooks/ring` | the built-in simulator (an optional external ring-sandbox emulator was not run) pushing to `POST /webhooks/ring` |
 | **HMAC-SHA256 Verification** | Real `X-Signature: sha256=<hex>` verified with `crypto.timingSafeEqual` | Identical real `X-Signature: sha256=<hex>` verification with configured secret |
 | **Snapshot Image Retrieval** | `POST /v1/devices/{id}/media/image/download` against `api.amazonvision.com` | Curated sample test images (`delivery.jpg`, `visitor.jpg`, `empty-porch.jpg`, `dark-porch.jpg`) |
 | **REST Client Implementation** | [`RingRestClient`](src/server/services/ring-rest-client.ts) (JSON:API device discovery, snapshot download, 429 backoff) | Fully mocked with 14 unit tests (`tests/ring-api-adapter.test.ts`) |
@@ -63,7 +63,7 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 ```
                                   +-------------------------------------------------------------+
                                   |                     Incoming Doorbell Event                 |
-                                  |  (Live Ring Cloud Webhook OR Offline ring-sandbox Emulator) |
+                                  |            (Ring webhook or built-in simulator)             |
                                   +------------------------------+------------------------------+
                                                                  |
                                                                  v  POST /webhooks/ring
@@ -163,12 +163,12 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 
 When exposing SignalDoor to the internet (for example, via ngrok or Cloudflare Tunnels to receive external webhooks):
 - **Configure secrets via `npm run setup`:** Always run `npm run setup` to generate strong, unique random 32-byte hex secrets for `RING_WEBHOOK_SECRET` and `INTERNAL_DEV_SECRET`. Never use default or empty secrets.
-- **Forward only webhook and OAuth endpoints:** Configure your reverse proxy or tunnel to forward only `/webhooks/ring` (and `/oauth/*` or `/ring/*` if using live OAuth linking).
+- **Forward only the webhook endpoint:** Configure your reverse proxy or tunnel to forward only `/webhooks/ring`.
 - **Never expose internal APIs or WebSockets:** Never expose `/api` (including `/api/simulator/trigger`) or `/ws` to public ingress. These endpoints are designed strictly for local browser and trusted internal operations.
 - **Active Header-Check Defense-in-Depth:** Even if misconfigured at the reverse proxy, internal endpoints are actively protected by server-side header guards:
   - All `/api/*` endpoints reject any request carrying `X-Forwarded-*` headers with `403 Forbidden`.
   - WebSocket (`/ws`) upgrade requests reject any connection carrying `X-Forwarded-*` headers with `403 Forbidden`.
-  - WebSocket (`/ws`) upgrade requests strictly require an `Origin` header matching allowed local origins (unless `ALLOW_NO_ORIGIN=1` is explicitly set). Public webhook and OAuth endpoints remain accessible for tunnel forwarding.
+  - WebSocket (`/ws`) upgrade requests strictly require an `Origin` header matching allowed local origins (unless `ALLOW_NO_ORIGIN=1` is explicitly set). Public webhook endpoint (`/webhooks/ring`) remains accessible for tunnel forwarding.
 
 
 ---
@@ -275,7 +275,7 @@ SignalDoor builds upon high-quality open-source software and tools:
 | Package / Resource | License | Purpose / Attribution |
 |---|---|---|
 | **SignalDoor (This Project)** | MIT License | Main application codebase |
-| **`ring-sandbox`** | MIT License | Offline Ring developer emulator created by Joseph Mayo |
+| **`ring-sandbox`** | MIT License | optional external tool, not used in tests, not verified by the author |
 | **`@aws-sdk/client-bedrock-runtime`** | Apache-2.0 | Amazon Web Services SDK for Bedrock Converse API |
 | **`react` & `react-dom`** | MIT License | Frontend UI rendering by Meta Platforms, Inc. |
 | **`express`** | MIT License | Backend HTTP server framework (OpenJS Foundation) |

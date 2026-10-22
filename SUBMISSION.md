@@ -148,7 +148,7 @@ We designed SignalDoor as a TypeScript monorepo combining modern web standards, 
 - **Smartwatch & Wearable Haptic Integration:** Expanding alerts to Apple Watch and Wear OS with distinct vibrotactile patterns for different visitor types (courier vs. guest).
 - **Smart Bulb & IoT Strobe Integration:** Direct integration with Philips Hue and Zigbee/Z-Wave smart bulbs to flash ambient home lighting when the doorbell rings.
 - **Customizable Resident Quick Replies:** Allowing residents to configure personalized quick-reply buttons (e.g., *"Please place packages behind the gate"*).
-- **Production Ring Partner Deployment:** Pursuing official Ring Partner OAuth approval to bring SignalDoor to commercial Ring App users worldwide.
+- **Production Ring Partner Deployment:** Applied for Ring developer early access; approval status: [AUTHOR TO FILL IN]
 
 ---
 

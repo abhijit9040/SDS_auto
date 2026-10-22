@@ -46,11 +46,15 @@ SignalDoor is engineered with a clean adapter architecture (`RingAdapter`) that 
 | Run 6 | Oct 22, 2026 | `visitor.jpg` | Illustration (25.2 KB) | Yes | 2295 ms | 10 | *"A person in a green shirt waves at the camera."* | Pass |
 | Run 7 | Oct 22, 2026 | `empty-porch.jpg` | Illustration (20.6 KB) | Yes | 2186 ms | 14 | *"A white house with a black door and a window on the left side."* | Pass |
 | Run 8 | Oct 22, 2026 | `dark-porch.jpg` | Illustration (14.7 KB) | Yes | 2133 ms | 10 | *"A dark room with a lit doorbell and a window."* | Pass |
+| Run 9 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2240 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+| Run 10 | Oct 22, 2026 | `visitor.jpg` | Illustration (25.2 KB) | Yes | 2174 ms | 10 | *"A person in a green shirt waves at the camera."* | Pass |
+| Run 11 | Oct 22, 2026 | `empty-porch.jpg` | Illustration (20.6 KB) | Yes | 2168 ms | 17 | *"A white house with a black door and a window, a doorbell, and a small brown box."* | Partial: no person invented, but the doormat was described as a small brown box |
+| Run 12 | Oct 22, 2026 | `dark-porch.jpg` | Illustration (14.7 KB) | Yes | 2189 ms | 10 | *"A dark house with a lit doorbell and a window."* | Pass |
 
 - **Delivery Illustration Statistics (Runs 1–5):** Min: 2137 ms, Median: 2186 ms, Max: 2328 ms. Exceeded 5000 ms SLA: 0 of 5. All 5 runs strictly obeyed the $\le 25$ words rule with zero demographic, identity, age, gender, or intent guessing.
-- **Empty & Dark Porch Evaluation:** `empty-porch.jpg` (Run 7) correctly described the physical building exterior without inventing a person. `dark-porch.jpg` (Run 8) described only the dimly visible scene elements without hallucination.
-- **Important Disclosure on Asset Sizes & Latency:** Earlier Run 0 (3535 ms) used a high-resolution photo (~935 KB), which has since been removed from the repository. Current Runs 1–8 use lightweight flat-style illustrations generated via code (`scripts/make-sample-images.py`, ~15–25 KB). These inputs are not realistic camera images or photos, latencies are not directly comparable across different image types/sizes, and real high-resolution camera snapshots in production may take longer.
-- **Ring Integration:** Tested with emulator only, not live (simulated and `ring-sandbox` synthetic payloads). All other hardware latencies are not yet measured.
+- **Empty & Dark Porch Evaluation:** `empty-porch.jpg` (Run 7) correctly described the physical building exterior without inventing a person. `dark-porch.jpg` (Run 8) described only the dimly visible scene elements without hallucination. In Run 11, `empty-porch.jpg` correctly avoided inventing any person, though the brown doormat was described as a small brown box.
+- **Important Disclosure on Asset Sizes & Latency:** Earlier Run 0 (3535 ms) used a high-resolution photo (~935 KB), which has since been removed from the repository. Runs 1–12 use lightweight flat-style illustrations generated via code (`scripts/make-sample-images.py`, ~15–25 KB). These inputs are not realistic camera images or photos, latencies are not directly comparable across different image types/sizes, and real high-resolution camera snapshots in production may take longer.
+- **Ring Integration:** Tested only against the project's own simulator and mocked tests. ring-sandbox was not run. No live Ring access.
 
 ---
 
@@ -190,7 +194,12 @@ npm run bedrock:smoke
 
 # Or test against a specific image:
 npm run bedrock:smoke -- path/to/image.jpg
+
+# Offline ring-sandbox emulator scripts:
+npm run sandbox:serve
+npm run sandbox:play
 ```
+*(requires `pip install 'ring-sandbox[server]'` and a Python 3 interpreter that has it; not verified by the author)*
 
 
 ---
@@ -248,7 +257,18 @@ AI-powered camera analysis requires strict privacy and ethical safety controls:
 
 ---
 
-## 8. Third-Party Licenses & Attributions
+## 8. Known Limitations
+
+SignalDoor is an open-source assistive smart doorbell prototype. Users, reviewers, and evaluators should be aware of the following known limitations:
+- **Object Misidentification in Multimodal Summaries:** Bedrock vision descriptions can occasionally misidentify inanimate scene objects (for example, in Run 11 on `empty-porch.jpg`, a brown doormat was described as a "small brown box"). While the prompt prevents guessing person identity, age, or intent, descriptions of inanimate objects are not guaranteed to be exact.
+- **Illustration Latency vs. Real Camera Snapshots:** Latencies were measured on small illustrations (~15–25 KB) on localhost, not real camera snapshots. High-resolution camera photos streamed over residential Wi-Fi and cloud networks will exhibit higher network and inference latencies.
+- **Ring Integration Scope:** Ring integration was tested only against a self-made emulator (the built-in TypeScript simulator adapter) and mocked tests (`RingRestClient`). Live integration against real Ring hardware devices and `api.amazonvision.com` requires corporate Ring Partner OAuth approval and has not been tested live.
+- **ring-sandbox Not Run:** `ring-sandbox` was not run end-to-end (`npm run sandbox:serve` failed on the author's machine because `python` resolved to an interpreter without the `ring_sandbox` module; payload shapes were compared from package documentation).
+- **Assistive Speech & Phone Behaviour Not Tested:** Screen reader speech output (NVDA, JAWS, VoiceOver) and physical mobile phone behaviour (tactile mobile vibration actuator via `navigator.vibrate`, mobile touch ergonomics, mobile browser chrome) were not tested on physical devices.
+
+---
+
+## 9. Third-Party Licenses & Attributions
 
 SignalDoor builds upon high-quality open-source software and tools:
 
@@ -284,7 +304,7 @@ SignalDoor builds upon high-quality open-source software and tools:
 
 ---
 
-## 9. Hackathon Submission & Team
+## 10. Hackathon Submission & Team
 
 - **Hackathon:** [Build, Ship, Shape: Amazon Developer Hackathon](https://amazon.devpost.com)
 - **Tracks:** Ring Track & AWS Builder Track (plus Open Source Mini-Challenge)

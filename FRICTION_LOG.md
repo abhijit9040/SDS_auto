@@ -23,14 +23,14 @@
 
 ### Task 5-lite: ring-sandbox Compatibility & REST Client Implementation
 - **ring-sandbox Emulator Evaluation & License:**
-  - *Setup:* Evaluated `ring-sandbox` (v0.5.0, PyPI, MIT License by Joseph Mayo) as a separate offline development process (`python -m ring_sandbox.cli serve --port 8787`).
-  - *Payload Differences & Reconciliation:*
-    - `meta.version`: Ring developer guide docs illustrate `"1.0"`; `ring-sandbox` emits `"1.1"`. Reconciled parser using flexible `version?: string`.
-    - `meta.time`: Ring documentation examples use epoch milliseconds (e.g. `1729000000000`), whereas `ring-sandbox` emits UTC ISO-8601 timestamps (`"2026-10-17T11:10:52.469284Z"`). Reconciled TypeScript definition to `time?: number | string` and ensured `new Date(...)` parsing handles both seamlessly.
-    - `data.attributes.source_type`: `ring-sandbox` explicitly includes `"source_type": "devices"`.
-    - `data.relationships`: Emitted as a JSON:API relationship structure (`devices.links.self = "/v1/devices/<device_id>"`).
-    - Signature Header: Both conform to `X-Signature: sha256=<hex>` over raw JSON request body bytes.
-  - *Outcome:* Compatibility verified in 15 minutes without vendoring or code duplication.
+  - *Setup:* Evaluated `ring-sandbox` (v0.5.0, PyPI, MIT License by Joseph Mayo — from package documentation, not verified by running it) as a separate offline development process (`python -m ring_sandbox.cli serve --port 8787`).
+  - *Payload Differences & Reconciliation (from package documentation, not verified by running it):*
+    - `meta.version`: Ring developer guide docs illustrate `"1.0"`; `ring-sandbox` emits `"1.1"` (from package documentation, not verified by running it). Reconciled parser using flexible `version?: string`.
+    - `meta.time`: Ring documentation examples use epoch milliseconds (e.g. `1729000000000`), whereas `ring-sandbox` emits UTC ISO-8601 timestamps (`"2026-10-17T11:10:52.469284Z"`, from package documentation, not verified by running it). Reconciled TypeScript definition to `time?: number | string` and ensured `new Date(...)` parsing handles both seamlessly.
+    - `data.attributes.source_type`: `ring-sandbox` explicitly includes `"source_type": "devices"` (from package documentation, not verified by running it).
+    - `data.relationships`: Emitted as a JSON:API relationship structure (`devices.links.self = "/v1/devices/<device_id>"`, from package documentation, not verified by running it).
+    - Signature Header: Both conform to `X-Signature: sha256=<hex>` over raw JSON request body bytes (from package documentation, not verified by running it).
+  - *Outcome:* ring-sandbox was not run end to end. npm run sandbox:serve failed on the author's machine because python resolved to an interpreter without the ring_sandbox module. Payload shapes were compared from the package documentation.
 - **Ring Partner REST Client (`api.amazonvision.com`):**
   - *Exponential Backoff for Rate Limiting (429):* *Design note (from docs, not live-tested):* Implemented exponential backoff starting at 1.0s (`1s * 2^attempt`) and parsing the `Retry-After` header. Essential to avoid cascading failures if a doorbell generates multiple rapid events.
   - *Binary Media Streaming:* *Design note (from docs, not live-tested):* `POST /v1/devices/{deviceId}/media/image/download` returns raw binary JPEG/PNG streams with metadata in headers (`X-Media-Timestamp`, `Content-Type`) rather than base64 in a JSON body. Stream buffering into Node `Buffer` in memory provides zero-disk ephemeral processing.
@@ -71,9 +71,13 @@
     | Run 6 | Oct 22, 2026 | `visitor.jpg` | Illustration (25.2 KB) | Yes | 2295 ms | 10 | *"A person in a green shirt waves at the camera."* | Pass |
     | Run 7 | Oct 22, 2026 | `empty-porch.jpg` | Illustration (20.6 KB) | Yes | 2186 ms | 14 | *"A white house with a black door and a window on the left side."* | Pass |
     | Run 8 | Oct 22, 2026 | `dark-porch.jpg` | Illustration (14.7 KB) | Yes | 2133 ms | 10 | *"A dark room with a lit doorbell and a window."* | Pass |
+    | Run 9 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2240 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
+    | Run 10 | Oct 22, 2026 | `visitor.jpg` | Illustration (25.2 KB) | Yes | 2174 ms | 10 | *"A person in a green shirt waves at the camera."* | Pass |
+    | Run 11 | Oct 22, 2026 | `empty-porch.jpg` | Illustration (20.6 KB) | Yes | 2168 ms | 17 | *"A white house with a black door and a window, a doorbell, and a small brown box."* | Partial: no person invented, but the doormat was described as a small brown box |
+    | Run 12 | Oct 22, 2026 | `dark-porch.jpg` | Illustration (14.7 KB) | Yes | 2189 ms | 10 | *"A dark house with a lit doorbell and a window."* | Pass |
   - *Delivery Illustration Statistics (Runs 1–5):* Min: 2137 ms, Median: 2186 ms, Max: 2328 ms. Exceeded 5000 ms SLA: 0 of 5. All 5 runs strictly adhered to the $\le 25$ words rule with zero demographic, identity, age, gender, or intent guessing.
   - *Empty & Dark Porch Evaluation:* `empty-porch.jpg` (Run 7) correctly described the physical building exterior without inventing a person. `dark-porch.jpg` (Run 8) described only the dimly visible scene elements without hallucination.
-  - *Important Disclosure on Asset Sizes & Latency:* Earlier Run 0 (3535 ms) used a high-resolution photo (~935 KB), which has since been removed from the repository. Current Runs 1–8 use lightweight flat-style illustrations generated via code (`scripts/make-sample-images.py`, ~15–25 KB). These inputs are not realistic camera images or photos, latencies are not directly comparable across different image types/sizes, and real high-resolution camera snapshots in production may take longer.
+  - *Important Disclosure on Asset Sizes & Latency:* Earlier Run 0 (3535 ms) used a high-resolution photo (~935 KB), which has since been removed from the repository. Runs 1–12 use lightweight flat-style illustrations generated via code (`scripts/make-sample-images.py`, ~15–25 KB). These inputs are not realistic camera images or photos, latencies are not directly comparable across different image types/sizes, and real high-resolution camera snapshots in production may take longer.
   - *Ring Integration & Other Latencies:* Ring integration was tested via emulator only, not live. All other latency data across physical hardware or unmeasured endpoints is not yet measured.
 
 

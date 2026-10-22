@@ -44,3 +44,8 @@ coverage/
 
 # Incoming raw images
 incoming-images/
+
+# Test reports & demo evidence
+demo-evidence/
+TEST_REPORT.md
+

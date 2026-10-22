@@ -30,7 +30,7 @@ Decisions:
   * Payload types: `meta.time`, `meta.version`, `meta.request_id`, `meta.account_id`; `data.id`, `data.type`, `data.attributes.source`, `data.attributes.timestamp` (flexible attributes)
   * Emulator signs its webhooks with the configured secret
 - Ring Sandbox & Mocked Client (Task 5-lite):
-  * Test compatibility of `ring-sandbox` emulator against `/webhooks/ring` verified in 15 minutes; handles ISO `meta.time`, `source_type`, and `relationships`
+  * ring-sandbox was not run end to end. npm run sandbox:serve failed on the author's machine because python resolved to an interpreter without the ring_sandbox module. Payload shapes were compared from the package documentation.
   * Ring Image Snapshots + devices REST client (`RingRestClient`) implemented for `api.amazonvision.com` with exponential backoff on 429, distinct 401/403/404/timeout error classes, and fail-fast startup guard
   * All tests and documentation clearly labeled as synthetic/mocked (not live-tested against production Ring servers)
   * Deferred live OAuth unless official Ring production partner approval is explicitly granted
@@ -62,7 +62,7 @@ Decisions:
 - Demo Milestones: Rough demo video checkpoint script produced in `DEMO_NOTES.md` (<3 minutes side-by-side); README, feedback, and friction log updated in every task
 
 Open questions & Contingencies:
-- Day 2 Fallback Trigger: [CLOSED] Ingestion and ring-sandbox emulator compatibility succeeded; no Alexa+ fallback required.
+- Day 2 Fallback Trigger: [CLOSED] ring-sandbox was not run end to end. npm run sandbox:serve failed on the author's machine because python resolved to an interpreter without the ring_sandbox module. Payload shapes were compared from the package documentation; no Alexa+ fallback required.
 - Live Bedrock verification: [VERIFIED] Unmocked Bedrock Converse API verified on `ap-southeast-2` with `amazon.nova-lite-v1:0` (Nova Lite, ap-southeast-2: one run, 14 words, 3535 ms, measured Oct 2026 (exact day not recorded); other latencies not yet measured).
 - Open Source mini challenge: confirm whether main repo counts or an additional project/PR is required.
 

@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current stage: 7 (Stage 7 — Security Hardening & Documentation Honesty completed; all Parts A & B implemented and verified)
+Current stage: final submission prep
 Completed:
 - Stage 0: Idea Brief (`BRIEF.md` created, gate verified)
 - Stage 1: Requirements and Scope (`SPEC.md` created & amended, gate verified)
@@ -21,7 +21,7 @@ Completed:
 Decisions:
 - Project Name: SignalDoor (Deaf-friendly Doorbell)
 - Target: Amazon Developer Hackathon (Build, Ship, Shape) — Ring Track + AWS Builder + Open Source
-- Target Submission Date: October 21, 2026 (compressed 5-day timeline)
+- Submission deadline: confirm on Devpost
 - Architecture Selection: Option A — Unified TypeScript Monorepo (Node.js/Express backend + React/Vite client)
 - Ring Ingestion & Webhooks:
   * Ingest endpoint: `POST /webhooks/ring`
@@ -34,7 +34,7 @@ Decisions:
   * Ring Image Snapshots + devices REST client (`RingRestClient`) implemented for `api.amazonvision.com` with exponential backoff on 429, distinct 401/403/404/timeout error classes, and fail-fast startup guard
   * All tests and documentation clearly labeled as synthetic/mocked (not live-tested against production Ring servers)
   * Deferred live OAuth unless official Ring production partner approval is explicitly granted
-  * Schedule compressed to submit by October 21
+  * Submission deadline: confirm on Devpost
 - Two-Phase Alerting: Immediate Phase 1 notification (<2.0s) with fallback text, Phase 2 enrichment (<5.0s) with Bedrock summary
 - Bedrock Multimodal Enrichment:
   * Model & Region: Loaded from environment variables (`BEDROCK_MODEL_ID`, `AWS_REGION`), zero hard-coded models (configurable examples: `amazon.nova-lite-v1:0` in `ap-southeast-2`)
@@ -63,7 +63,7 @@ Decisions:
 
 Open questions & Contingencies:
 - Day 2 Fallback Trigger: [CLOSED] Ingestion and ring-sandbox emulator compatibility succeeded; no Alexa+ fallback required.
-- Live Bedrock verification: [VERIFIED] Unmocked Bedrock Converse API verified on `ap-southeast-2` with `amazon.nova-lite-v1:0` (Nova Lite, ap-southeast-2: one run, 14 words, 3535 ms, measured Oct 18, 2026; other latencies not yet measured).
+- Live Bedrock verification: [VERIFIED] Unmocked Bedrock Converse API verified on `ap-southeast-2` with `amazon.nova-lite-v1:0` (Nova Lite, ap-southeast-2: one run, 14 words, 3535 ms, measured Oct 2026 (exact day not recorded); other latencies not yet measured).
 - Open Source mini challenge: confirm whether main repo counts or an additional project/PR is required.
 
 

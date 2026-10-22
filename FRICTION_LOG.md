@@ -62,7 +62,7 @@
   - *Benchmark Table:*
     | Run # | Date | Input Asset | Type & Size | Success | Latency | Words | Generated Summary | Rule Pass? |
     |---|---|---|---|---|---|---|---|---|
-    | Run 0 | Oct 18, 2026 | *Previous sample photo* | Photo (~935 KB, removed) | Yes | 3535 ms | 14 | *"A person in a blue shirt and mask holds a box at the door."* | Pass |
+    | Run 0 | Oct 2026 (exact day not recorded) | *Previous sample photo* | Photo (~935 KB, removed) | Yes | 3535 ms | 14 | *"A person in a blue shirt and mask holds a box at the door."* | Pass |
     | Run 1 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2328 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door"* | Pass |
     | Run 2 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2186 ms | 15 | *"A person in a blue jacket and black hat holding a box at the door."* | Pass |
     | Run 3 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2170 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |

@@ -89,7 +89,7 @@ We designed SignalDoor as a TypeScript monorepo combining modern web standards, 
 
 | Run # | Date | Input Asset | Type & Size | Success | Latency | Words | Generated Summary | Rule Pass? |
 |---|---|---|---|---|---|---|---|---|
-| Run 0 | Oct 18, 2026 | *Previous sample photo* | Photo (~935 KB, removed) | Yes | 3535 ms | 14 | *"A person in a blue shirt and mask holds a box at the door."* | Pass |
+| Run 0 | Oct 2026 (exact day not recorded) | *Previous sample photo* | Photo (~935 KB, removed) | Yes | 3535 ms | 14 | *"A person in a blue shirt and mask holds a box at the door."* | Pass |
 | Run 1 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2328 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door"* | Pass |
 | Run 2 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2186 ms | 15 | *"A person in a blue jacket and black hat holding a box at the door."* | Pass |
 | Run 3 | Oct 22, 2026 | `delivery.jpg` | Illustration (24.6 KB) | Yes | 2170 ms | 15 | *"A person in a blue shirt and black hat holding a box at the door."* | Pass |
@@ -159,7 +159,7 @@ SignalDoor directly addresses the Ring Track by extending Ring smart doorbells i
 
 ### 10.2 AWS Builder Track Nomination
 SignalDoor integrates Amazon Bedrock as the multimodal cognitive engine:
-- Integrates the Amazon Bedrock Converse API (`@aws-sdk/client-bedrock-runtime`) with Amazon Nova Lite (region and model are configurable). Service logic, timeout handling, prompt boundaries, and payload building are covered by mocked tests; one unmocked live run completed on Oct 18 (see What Was Tested Live).
+- Integrates the Amazon Bedrock Converse API (`@aws-sdk/client-bedrock-runtime`) with Amazon Nova Lite (region and model are configurable). Service logic, timeout handling, prompt boundaries, and payload building are covered by mocked tests; one unmocked live run completed in Oct 2026 (exact day not recorded) (see What Was Tested Live).
 - Features isolated responsible-AI prompt engineering ([`bedrock-prompt.txt`](src/server/services/bedrock-prompt.txt)) with zero demographic inference, anti-hallucination guardrails, and plain-language limits ($\le 20$ words).
 - Enforces an `AbortController` 5.0-second SLA timeout with graceful Two-Phase fallback.
 - Operates with 100% ephemeral in-memory byte buffers for strict privacy compliance.

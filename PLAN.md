@@ -36,10 +36,10 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ## 2. Schedule & Time Budget Overview
 
-- **Target Deadline:** October 21, 2026 (compressed 5-day timeline for early hackathon submission).
+- **Submission deadline:** confirm on Devpost.
 - **Format:** Solo build, focused MVP.
 - **Budget:** ~28 hours across 4 active development days + 1 submission day.
-- **Milestones:** Task 6 begins on Day 5 (Oct 21). Rough demo video checkpoint recorded at Task 3.
+- **Milestones:** Task 6 begins on Day 5 (Submission deadline: confirm on Devpost). Rough demo video checkpoint recorded at Task 3.
 
 | Phase | Target Date | Focus | Est. Hours |
 |---|---|---|---|
@@ -48,7 +48,7 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 | **Phase 3: Two-Way & Checkpoint** | Day 3 (Oct 19) | Quick Replies, Visitor Screen (`/visitor`), & rough video checkpoint | 5.5h [DONE] |
 | **Phase 4: Accessibility Hardening**| Day 3 (Oct 19) | WCAG AA Contrast, 24px Text, Flashing Safety | 4.0h [DONE] |
 | **Phase 5-lite: Ring Sandbox & Mocked Snapshots** | Day 4 (Oct 20) | `ring-sandbox` emulator verification + Mocked Snapshots client (no live/OAuth) | 3.5h |
-| **Phase 6: Submission & Video** | Day 5 (Oct 21) | Demo Video, Product Feedback, Friction Log, Devpost submission | 4.5h |
+| **Phase 6: Submission & Video** | Day 5 (Submission deadline: confirm on Devpost) | Demo Video, Product Feedback, Friction Log, Devpost submission | 4.5h |
 
 ---
 
@@ -172,7 +172,7 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 
 ### [x] Task 6: Hackathon Deliverables, Demo Video & Submission
 *Final hackathon deliverables, documentation, demo script, feedback, and Devpost submission.* [COMPLETED]
-- **Objective:** Prepare and finalize all required hackathon deliverables (starts on Day 5, Oct 21):
+- **Objective:** Prepare and finalize all required hackathon deliverables (starts on Day 5 (Submission deadline: confirm on Devpost)):
   1. Finalize `README.md` with honest disclosure of `RING_MODE=emulator` vs live, architecture diagram, and quickstart.
   2. Final demo video ($\le 3$ minutes) demonstrating end-to-end doorbell press &rarr; immediate alert &rarr; Bedrock AI summary &rarr; quick reply on `/visitor` screen.
   3. Finalize written `PRODUCT_FEEDBACK.md` for Ring and Amazon Bedrock teams.
@@ -192,7 +192,7 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 ### [x] Task 7: Security Hardening & Documentation Honesty (Parts A & B)
 *Comprehensive documentation honesty audit and multi-layer security hardening.* [COMPLETED]
 - **Part A (Documentation Honesty):**
-  - Standardized all Bedrock disclosures to Amazon Nova Lite (`ap-southeast-2`), verified via live unmocked run on Oct 18, 2026 (`3535 ms`, 14 words).
+  - Standardized all Bedrock disclosures to Amazon Nova Lite (`ap-southeast-2`), verified via live unmocked run in Oct 2026 (exact day not recorded) (`3535 ms`, 14 words).
   - Relabeled docs-based friction entries as design notes. Corrected header to `X-Signature`.
   - Updated quickstart with `SDS_auto` clone directory, port separation (`:5173` UI, `:3000` API), and Node 22+ guidance.
   - Set LICENSE copyright to Abhijit and added Sample Images attribution section.
@@ -213,4 +213,4 @@ Based on official Ring Developer / Amazon Vision API documentation (`api.amazonv
 ## 4. Verification & Gate Check
 
 - **Gate Requirement:** Every task is finishable in one session (estimates range from 3.5h to 6.0h).
-- **Milestone Guarantee:** Working walking skeleton on Day 1 (Task 1), full AI context on Day 2 (Task 2), complete accessible two-way demo on Day 3 (Tasks 3-4), Ring compatibility and mocked client on Day 4 (Task 5-lite), submission finalized on Day 5 (Task 6, Oct 21), security hardening and documentation honesty finalized (Task 7).
+- **Milestone Guarantee:** Working walking skeleton on Day 1 (Task 1), full AI context on Day 2 (Task 2), complete accessible two-way demo on Day 3 (Tasks 3-4), Ring compatibility and mocked client on Day 4 (Task 5-lite), submission finalized on Day 5 (Task 6, Submission deadline: confirm on Devpost), security hardening and documentation honesty finalized (Task 7).
